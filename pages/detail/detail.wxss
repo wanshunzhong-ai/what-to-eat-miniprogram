@@ -1,0 +1,130 @@
+.d-hero {
+  background: linear-gradient(135deg, #FFF1E6 0%, #FFE2D2 100%);
+  border-radius: 32rpx;
+  padding: 44rpx 36rpx;
+  text-align: center;
+  margin-top: 16rpx;
+}
+.d-emoji {
+  width: 140rpx;
+  height: 140rpx;
+  line-height: 140rpx;
+  margin: 0 auto 20rpx;
+  border-radius: 40rpx;
+  background: #fff;
+  font-size: 80rpx;
+  box-shadow: 0 8rpx 22rpx rgba(255, 107, 53, 0.18);
+}
+.d-name {
+  font-size: 46rpx;
+  font-weight: 700;
+}
+.d-tags {
+  margin-top: 16rpx;
+}
+.d-meta {
+  margin-top: 16rpx;
+  font-size: 25rpx;
+  color: var(--text-sub);
+}
+.d-meta .dot {
+  margin: 0 12rpx;
+}
+.d-desc {
+  margin-top: 18rpx;
+  font-size: 27rpx;
+  color: #7A6E64;
+  line-height: 1.6;
+}
+
+/* 食材 */
+.ing-card {
+  padding: 10rpx 28rpx;
+}
+.ing-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.ing-item:last-child {
+  border-bottom: none;
+}
+.ing-name {
+  font-size: 29rpx;
+  color: var(--text);
+}
+.ing-amount {
+  font-size: 29rpx;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+.ing-amount.small {
+  font-size: 25rpx;
+  font-weight: 400;
+  color: var(--text-sub);
+}
+
+/* 步骤 */
+.steps {
+  background: #fff;
+  border-radius: 26rpx;
+  padding: 12rpx 28rpx;
+  box-shadow: var(--shadow);
+}
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  padding: 22rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.step-item:last-child {
+  border-bottom: none;
+}
+.step-no {
+  flex: none;
+  width: 44rpx;
+  height: 44rpx;
+  line-height: 44rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 600;
+  margin-right: 20rpx;
+}
+.step-text {
+  flex: 1;
+  font-size: 28rpx;
+  line-height: 1.6;
+}
+
+/* 小贴士 */
+.tip-card {
+  margin-top: 32rpx;
+  background: #FFF3E9;
+  border-radius: 22rpx;
+  padding: 26rpx 28rpx;
+}
+.tip-title {
+  font-size: 27rpx;
+  font-weight: 700;
+  color: #A96A3D;
+}
+.tip-text {
+  margin-top: 10rpx;
+  font-size: 26rpx;
+  color: #A96A3D;
+  line-height: 1.6;
+}
+
+/* 操作 */
+.action-row {
+  display: flex;
+  margin-top: 44rpx;
+}
+.action-row .btn-ghost {
+  margin: 0 10rpx;
+}

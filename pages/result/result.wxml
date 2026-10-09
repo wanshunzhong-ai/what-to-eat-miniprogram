@@ -1,0 +1,64 @@
+<block wx:if="{{result}}">
+  <view class="page-wrap">
+    <!-- 头部 -->
+    <view class="result-hero">
+      <view class="rh-label">今天为你推荐</view>
+      <view class="rh-title">{{result.people}} 人 · {{result.mealLabel}}</view>
+      <view class="rh-tags">
+        <text class="chip">{{result.city.name}}</text>
+        <text class="chip" wx:for="{{result.cuisines}}" wx:key="*this">{{item}}</text>
+      </view>
+      <view class="rh-summary">共 {{result.count}} 道 · 最长约 {{result.totalTime}} 分钟</view>
+    </view>
+
+    <!-- 菜品列表 -->
+    <view class="dish-card" wx:for="{{result.dishes}}" wx:key="id" data-id="{{item.id}}" bindtap="onDish">
+      <view class="dish-emoji">{{item.emoji}}</view>
+      <view class="dish-body">
+        <view class="dish-top">
+          <text class="dish-name">{{item.name}}</text>
+          <text class="dish-cat">{{item.category}}</text>
+        </view>
+        <view class="dish-desc">{{item.desc}}</view>
+        <view class="dish-meta">
+          <text class="meta-item">⏱ {{item.time}} 分钟</text>
+          <text class="meta-item">👥 {{result.people}} 人份</text>
+          <text class="meta-item {{item.spicy > 0 ? 'spicy' : ''}}">{{item.spicyText}}</text>
+        </view>
+        <view class="dish-ings">{{item.ingPreview}}</view>
+      </view>
+      <view class="dish-arrow">›</view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="action-row">
+      <button class="btn-ghost flex-1" bindtap="onChange">🔄 换一批</button>
+      <button class="btn-ghost flex-1" open-type="share">📤 分享</button>
+    </view>
+
+    <!-- 本地人气美食 -->
+    <view class="section-title">{{result.city.name}}必吃 · 本地人气</view>
+    <view class="local-list">
+      <view class="local-item" wx:for="{{result.localFoods}}" wx:key="name">
+        <text class="local-emoji">{{item.emoji}}</text>
+        <view class="local-body">
+          <view class="local-name">{{item.name}}</view>
+          <view class="local-desc">{{item.desc}}</view>
+        </view>
+      </view>
+    </view>
+    <view class="nearby-note">
+      💡 想直接吃现成的？打开微信「搜一搜」，搜「{{result.city.name}} 附近美食」就能看到周边餐厅。
+    </view>
+
+    <!-- 返回首页 -->
+    <view class="back-home" bindtap="backHome">返回首页重新选 →</view>
+    <view class="safe-bottom"></view>
+  </view>
+</block>
+
+<view wx:else class="empty">
+  <text class="empty-emoji">🍽️</text>
+  <text>还没有推荐结果</text>
+  <view class="go-home" bindtap="backHome">回到首页</view>
+</view>

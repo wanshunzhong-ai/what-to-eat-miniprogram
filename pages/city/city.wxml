@@ -1,0 +1,59 @@
+<view class="page-wrap">
+  <!-- 搜索 -->
+  <view class="search-bar">
+    <text class="search-icon">🔍</text>
+    <input
+      class="search-input"
+      placeholder="搜索城市或省份，如 成都 / 广东"
+      placeholder-class="ph"
+      value="{{keyword}}"
+      bindinput="onInput"
+      confirm-type="search"
+    />
+  </view>
+
+  <!-- 定位按钮 -->
+  <view class="locate-btn" bindtap="onUseLocation">
+    <text class="locate-emoji">🎯</text>
+    <text>{{locating ? '定位中…' : '使用当前位置自动识别'}}</text>
+  </view>
+
+  <!-- 热门城市 -->
+  <block wx:if="{{!keyword}}">
+    <view class="section-title">热门城市</view>
+    <view class="hot-grid">
+      <view
+        wx:for="{{hotList}}"
+        wx:key="name"
+        class="hot-item {{cityName === item.name ? 'hot-on' : ''}}"
+        data-name="{{item.name}}"
+        bindtap="onPickCity"
+      >
+        <view class="hot-name">{{item.name}}</view>
+        <view class="hot-cuisine">{{item.cuisine}}</view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 城市列表 -->
+  <view class="section-title">{{keyword ? '搜索结果' : '全部城市'}}</view>
+  <view wx:if="{{list.length === 0}}" class="empty">
+    <text class="empty-emoji">🔍</text>
+    <text>没有找到这个城市</text>
+  </view>
+  <view
+    wx:for="{{list}}"
+    wx:key="name"
+    class="city-item"
+    data-name="{{item.name}}"
+    bindtap="onPickCity"
+  >
+    <view class="ci-left">
+      <text class="ci-name">{{item.name}}</text>
+      <text class="ci-prov">{{item.province}}</text>
+    </view>
+    <view class="ci-cuisine">{{item.cuisine}} ›</view>
+  </view>
+
+  <view class="city-foot">当前城市：{{cityName || '未选择'}}</view>
+</view>

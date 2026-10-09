@@ -1,0 +1,13 @@
+# 依赖
+node_modules/
+
+# 微信开发者工具本地私有配置（含本机设置，不应提交）
+project.private.config.json
+
+# 工作区与产物标记文件（不属于小程序源码）
+.workbuddy/
+*.genie
+
+# 系统文件
+.DS_Store
+Thumbs.db

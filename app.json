@@ -1,0 +1,27 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/result/result",
+    "pages/detail/detail",
+    "pages/mine/mine",
+    "pages/city/city"
+  ],
+  "window": {
+    "backgroundTextStyle": "dark",
+    "navigationBarBackgroundColor": "#FFF7F1",
+    "navigationBarTitleText": "今天吃什么",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF7F1"
+  },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于识别你所在的城市，为你推荐当地特色美食"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
+  "style": "v2",
+  "lazyCodeLoading": "requiredComponents",
+  "sitemapLocation": "sitemap.json"
+}

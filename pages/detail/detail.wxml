@@ -1,0 +1,60 @@
+<view class="page-wrap" wx:if="{{dish}}">
+  <!-- 头部 -->
+  <view class="d-hero">
+    <view class="d-emoji">{{dish.emoji}}</view>
+    <view class="d-name">{{dish.name}}</view>
+    <view class="d-tags">
+      <text class="chip">{{dish.cuisine}}</text>
+      <text class="chip chip-plain">{{dish.category}}</text>
+      <text class="chip {{dish.spicy > 0 ? 'chip-spicy' : 'chip-plain'}}">{{spicyText}}</text>
+    </view>
+    <view class="d-meta">
+      <text>⏱ {{dish.time}} 分钟</text>
+      <text class="dot">·</text>
+      <text>🔥 {{difficultyText}}</text>
+      <text class="dot">·</text>
+      <text>👥 {{people}} 人份</text>
+    </view>
+    <view class="d-desc">{{dish.desc}}</view>
+  </view>
+
+  <!-- 食材 -->
+  <view class="section-title">食材清单 · {{people}} 人份</view>
+  <view class="card ing-card">
+    <view class="ing-item" wx:for="{{dish.ingredients}}" wx:key="name">
+      <text class="ing-name">{{item.name}}</text>
+      <text class="ing-amount">{{item.amount}}</text>
+    </view>
+    <view class="ing-item" wx:if="{{seasoningText}}">
+      <text class="ing-name">调料</text>
+      <text class="ing-amount small">{{seasoningText}}</text>
+    </view>
+  </view>
+
+  <!-- 做法 -->
+  <view class="section-title">做法步骤</view>
+  <view class="steps">
+    <view class="step-item" wx:for="{{dish.steps}}" wx:key="*this">
+      <view class="step-no">{{index + 1}}</view>
+      <view class="step-text">{{item}}</view>
+    </view>
+  </view>
+
+  <!-- 小贴士 -->
+  <view wx:if="{{dish.tip}}" class="tip-card">
+    <view class="tip-title">💡 小贴士</view>
+    <view class="tip-text">{{dish.tip}}</view>
+  </view>
+
+  <!-- 操作 -->
+  <view class="action-row">
+    <button class="btn-ghost flex-1" bindtap="onFav">{{isFav ? '⭐ 已收藏' : '☆ 收藏这道菜'}}</button>
+    <button class="btn-ghost flex-1" open-type="share">📤 分享</button>
+  </view>
+  <view class="safe-bottom"></view>
+</view>
+
+<view wx:else class="empty">
+  <text class="empty-emoji">🍽️</text>
+  <text>没有找到这道菜</text>
+</view>

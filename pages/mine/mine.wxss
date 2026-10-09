@@ -1,0 +1,131 @@
+.hero {
+  padding: 24rpx 8rpx 20rpx;
+}
+.hero-title {
+  font-size: 50rpx;
+  font-weight: 700;
+}
+.hero-sub {
+  margin-top: 10rpx;
+  color: var(--text-sub);
+  font-size: 27rpx;
+}
+
+/* 偏好 */
+.pref-card {
+  padding: 12rpx 28rpx;
+}
+.pref-row {
+  display: flex;
+  align-items: center;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.pref-row:last-child {
+  border-bottom: none;
+}
+.pref-label {
+  width: 140rpx;
+  flex: none;
+  color: var(--text-sub);
+  font-size: 27rpx;
+}
+.pref-switch {
+  transform: scale(0.85);
+  transform-origin: left center;
+}
+.flex-1 {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 分区标题（带右侧操作） */
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 44rpx 0 22rpx;
+}
+.section-head .section-title {
+  margin: 0;
+}
+.clear-btn {
+  font-size: 25rpx;
+  color: var(--text-sub);
+  padding: 8rpx 16rpx;
+}
+
+.mini-empty {
+  font-size: 25rpx;
+  color: var(--text-light);
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 40rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+}
+
+/* 收藏 */
+.fav-item {
+  display: flex;
+  align-items: center;
+  background: #fff;
+  border-radius: 22rpx;
+  padding: 22rpx 26rpx;
+  margin-bottom: 14rpx;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+}
+.fav-emoji {
+  font-size: 46rpx;
+  margin-right: 22rpx;
+}
+.fav-body {
+  flex: 1;
+  min-width: 0;
+}
+.fav-name {
+  font-size: 31rpx;
+  font-weight: 600;
+}
+.fav-sub {
+  font-size: 23rpx;
+  color: var(--text-light);
+  margin-top: 4rpx;
+}
+.fav-arrow {
+  font-size: 40rpx;
+  color: var(--text-light);
+}
+
+/* 历史 */
+.his-item {
+  background: #fff;
+  border-radius: 22rpx;
+  padding: 24rpx 26rpx;
+  margin-bottom: 14rpx;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+}
+.his-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.his-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.his-time {
+  font-size: 23rpx;
+  color: var(--text-light);
+}
+.his-city {
+  font-size: 24rpx;
+  color: var(--primary-dark);
+  margin-top: 8rpx;
+}
+.his-dishes {
+  font-size: 25rpx;
+  color: var(--text-sub);
+  margin-top: 8rpx;
+  line-height: 1.5;
+}

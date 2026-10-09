@@ -1,0 +1,95 @@
+<view class="page-wrap">
+  <!-- 顶部问候 -->
+  <view class="hero">
+    <view class="hero-title">{{greeting}}</view>
+    <view class="hero-sub">纠结吃什么？交给我来决定 👇</view>
+  </view>
+
+  <!-- 定位城市 -->
+  <view class="card city-card" bindtap="onChooseCity">
+    <view class="city-left">
+      <view class="city-pin {{city ? 'pin-on' : ''}}">📍</view>
+      <view class="city-text">
+        <view class="city-name">{{city ? city.name : '还没选城市'}}</view>
+        <view class="city-desc">{{city ? (city.province + ' · ' + (city.cuisine || '家常菜')) : '选择城市后为你推荐当地味道'}}</view>
+      </view>
+    </view>
+    <view class="city-action">切换 ›</view>
+  </view>
+
+  <view wx:if="{{locating}}" class="tip-line">正在获取你的位置…</view>
+  <view wx:elif="{{!city}}" class="tip-line">
+    <text>{{cityStatus || '定位失败也没关系，点上面手动选城市'}}</text>
+  </view>
+
+  <!-- 人数 -->
+  <view class="section-title">几个人吃？</view>
+  <scroll-view class="chip-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view class="chip-row">
+      <view
+        wx:for="{{peopleOptions}}"
+        wx:key="*this"
+        class="pick-chip {{people === item ? 'pick-on' : ''}}"
+        data-value="{{item}}"
+        bindtap="onPickPeople"
+      >{{item}}人</view>
+    </view>
+  </scroll-view>
+
+  <!-- 餐次 -->
+  <view class="section-title">哪一餐？</view>
+  <view class="chip-row wrap">
+    <view
+      wx:for="{{mealOptions}}"
+      wx:key="key"
+      class="pick-chip {{meal === item.key ? 'pick-on' : ''}}"
+      data-value="{{item.key}}"
+      bindtap="onPickMeal"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 口味偏好 -->
+  <view class="section-title">口味偏好</view>
+  <view class="card pref-card">
+    <view class="pref-row">
+      <view class="pref-label">辣度</view>
+      <view class="chip-row wrap flex-1">
+        <view
+          wx:for="{{spicyOptions}}"
+          wx:key="value"
+          class="pick-chip sm {{pref.spicy === item.value ? 'pick-on' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onPickSpicy"
+        >{{item.label}}</view>
+      </view>
+    </view>
+    <view class="pref-row">
+      <view class="pref-label">想清淡</view>
+      <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
+    </view>
+    <view class="pref-row">
+      <view class="pref-label">做菜时间</view>
+      <view class="chip-row wrap flex-1">
+        <view
+          wx:for="{{timeOptions}}"
+          wx:key="value"
+          class="pick-chip sm {{pref.maxTime === item.value ? 'pick-on' : ''}}"
+          data-value="{{item.value}}"
+          bindtap="onPickTime"
+        >{{item.label}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 主按钮 -->
+  <view class="start-wrap">
+    <button class="btn-primary" bindtap="onStart">😋 帮我决定吃什么</button>
+    <view class="start-hint">{{city ? ('为 ' + people + ' 人推荐一顿' + mealLabel + ' · ' + (city.cuisine || '家常菜') + '为主') : '先选择城市'}}</view>
+  </view>
+
+  <!-- 底部入口 -->
+  <view class="footer-links">
+    <view class="footer-link" bindtap="goMine">⭐ 我的收藏 / 历史</view>
+    <view class="footer-link" bindtap="onRelocate">🎯 重新定位</view>
+  </view>
+</view>

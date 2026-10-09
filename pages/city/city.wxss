@@ -1,0 +1,104 @@
+.search-bar {
+  display: flex;
+  align-items: center;
+  height: 88rpx;
+  background: #fff;
+  border-radius: 44rpx;
+  padding: 0 28rpx;
+  box-shadow: var(--shadow);
+  margin-top: 8rpx;
+}
+.search-icon {
+  font-size: 30rpx;
+  margin-right: 14rpx;
+}
+.search-input {
+  flex: 1;
+  font-size: 28rpx;
+}
+.ph {
+  color: var(--text-light);
+}
+
+.locate-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 88rpx;
+  margin-top: 24rpx;
+  border-radius: 44rpx;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 29rpx;
+  font-weight: 600;
+}
+.locate-emoji {
+  margin-right: 12rpx;
+}
+
+/* 热门城市 */
+.hot-grid {
+  display: flex;
+  flex-wrap: wrap;
+  margin: 0 -8rpx;
+}
+.hot-item {
+  width: calc(25% - 16rpx);
+  margin: 8rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 22rpx 12rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.06);
+}
+.hot-item.hot-on {
+  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
+}
+.hot-item.hot-on .hot-name,
+.hot-item.hot-on .hot-cuisine {
+  color: #fff;
+}
+.hot-name {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.hot-cuisine {
+  font-size: 21rpx;
+  color: var(--text-light);
+  margin-top: 4rpx;
+}
+
+/* 城市列表 */
+.city-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 26rpx 20rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  margin-bottom: 14rpx;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+}
+.ci-left {
+  display: flex;
+  align-items: baseline;
+}
+.ci-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  margin-right: 16rpx;
+}
+.ci-prov {
+  font-size: 23rpx;
+  color: var(--text-light);
+}
+.ci-cuisine {
+  font-size: 25rpx;
+  color: var(--primary-dark);
+}
+.city-foot {
+  text-align: center;
+  color: var(--text-light);
+  font-size: 24rpx;
+  margin: 30rpx 0 10rpx;
+}
