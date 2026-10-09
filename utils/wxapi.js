@@ -79,6 +79,7 @@ const STUB_APIS = [
   'pageScrollTo', 'vibrateShort', 'vibrateLong',
   'setNavigationBarTitle', 'setNavigationBarColor', 'showNavigationBarLoading', 'hideNavigationBarLoading',
   'openSetting', 'getSetting', 'setClipboardData', 'makePhoneCall', 'previewImage',
+  'openLocation',
   'navigateTo', 'redirectTo', 'navigateBack', 'reLaunch', 'switchTab', 'setTabBarBadge'
 ];
 

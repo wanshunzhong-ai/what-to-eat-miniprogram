@@ -3,6 +3,7 @@ const recommender = require('../../utils/recommender.js');
 const engine = require('../../utils/engine.js');
 const citiesData = require('../../utils/cities.js');
 const wxapi = require('../../utils/wxapi.js');
+const takeoutData = require('../../utils/takeout.js');
 
 const SPICY_OPTIONS = [
   { value: -1, label: '随便' },
@@ -12,10 +13,11 @@ const SPICY_OPTIONS = [
   { value: 3, label: '重辣' }
 ];
 
+// 做菜时间是「软偏好」：只是优先推荐快手的，不会把慢菜直接排除掉
 const TIME_OPTIONS = [
   { value: 0, label: '不限' },
-  { value: 30, label: '30分钟内' },
-  { value: 60, label: '1小时内' }
+  { value: 30, label: '尽量30分钟内' },
+  { value: 60, label: '尽量1小时内' }
 ];
 
 /** 把定位精度转成好读的文案 */
@@ -47,8 +49,12 @@ Page({
     city: null,
     locating: false,
     cityStatus: '',
+    // 吃饭方式：cook=自己做（推荐一桌菜） | takeout=点外卖（推荐附近的店）
+    mode: 'cook',
     people: 2,
-    peopleOptions: [1, 2, 3, 4, 5, 6, 7, 8],
+    // 常用人数快捷选项；更多人数用下面的步进器微调（上限 15，再多人就该分桌了）
+    peopleOptions: [1, 2, 3, 4, 5, 6, 8, 10, 12, 15],
+    peopleMax: 15,
     meal: 'dinner',
     mealLabel: '晚餐',
     mealOptions: [
@@ -56,20 +62,32 @@ Page({
       { key: 'lunch', label: '午餐' },
       { key: 'dinner', label: '晚餐' }
     ],
+    // 一桌菜的结构建议（选了人数/餐次后实时更新）
+    menu: null,
+    menuTotal: 0,
+    menuTags: [],
+    menuText: '',
+    menuTip: '',
     spicyOptions: SPICY_OPTIONS,
     timeOptions: TIME_OPTIONS,
-    pref: { spicy: -1, light: false, maxTime: 0 }
+    pref: { spicy: -1, light: false, maxTime: 0 },
+    budget: 'any',
+    budgetOptions: takeoutData.BUDGETS,
+    startHint: ''
   },
 
   onLoad() {
     this.setGreeting();
     const meal = recommender.mealByTime();
+    const people = this.clampPeople(app.globalData.people || 2);
     this.setData({
       meal: meal,
       mealLabel: recommender.MEAL_LABEL[meal] || '一餐',
       pref: Object.assign({ spicy: -1, light: false, maxTime: 0 }, app.globalData.pref || {}),
-      people: app.globalData.people || 2
+      people: people
     });
+    this.refreshMenu();
+    this.refreshHint();
   },
 
   onShow() {
@@ -82,6 +100,58 @@ Page({
     if (!city) {
       this.autoLocate();
     }
+    this.refreshMenu();
+    this.refreshHint();
+  },
+
+  /** 人数上下限保护（1 ~ peopleMax） */
+  clampPeople(n) {
+    const v = Math.round(Number(n) || 1);
+    return Math.max(1, Math.min(this.data.peopleMax, v));
+  },
+
+  /**
+   * 刷新「这一桌建议怎么配」
+   * 按中式用餐习惯把人数换算成：凉菜（冷盘）+ 热菜（荤/素）+ 汤 + 主食
+   */
+  refreshMenu() {
+    const d = this.data;
+    const plan = recommender.planMenu(d.people, d.meal);
+    const tags = [];
+    if (d.meal === 'breakfast') {
+      if (plan.staple) tags.push({ key: 'staple', label: '主食 ' + plan.staple });
+      if (plan.snack) tags.push({ key: 'snack', label: '小吃 ' + plan.snack });
+      if (plan.light) tags.push({ key: 'light', label: '轻食 ' + plan.light });
+    } else {
+      if (plan.cold) tags.push({ key: 'cold', label: '凉菜 ' + plan.cold });
+      if (plan.meat) tags.push({ key: 'meat', label: '荤菜 ' + plan.meat });
+      if (plan.veg) tags.push({ key: 'veg', label: '素菜 ' + plan.veg });
+    }
+    if (plan.soup) tags.push({ key: 'soup', label: '汤 ' + plan.soup });
+    if (d.meal !== 'breakfast' && plan.staple) tags.push({ key: 'staple', label: '主食 ' + plan.staple });
+
+    this.setData({
+      menu: plan,
+      menuTags: tags,
+      menuTotal: recommender.planTotal(plan),
+      menuText: recommender.describeMenu(plan, d.meal),
+      menuTip: recommender.menuTip(d.people, d.meal)
+    });
+  },
+
+  /** 主按钮下方那行说明，随模式/城市/人数/餐次/预算变化 */
+  refreshHint() {
+    const d = this.data;
+    let hint;
+    if (!d.city) {
+      hint = '先选择城市';
+    } else if (d.mode === 'takeout') {
+      const b = d.budgetOptions.filter(function (x) { return x.key === d.budget; })[0];
+      hint = '找 ' + d.people + ' 人的' + d.mealLabel + ' · ' + (b ? b.label : '不限预算') + ' · 按距离排序';
+    } else {
+      hint = '为 ' + d.people + ' 人推荐一顿' + d.mealLabel + ' · ' + (d.city.cuisine || '家常菜') + '为主';
+    }
+    this.setData({ startHint: hint });
   },
 
   setGreeting() {
@@ -124,6 +194,7 @@ Page({
         }
         app.setCity(c);
         that.setData({ city: c, cityStatus: buildStatus(c, res) });
+        that.refreshHint();
         // 落在两城交界、且两地菜系不同时，让用户点一下就确认
         if (c.ambiguous) that.confirmAmbiguous(c);
         return;
@@ -154,6 +225,7 @@ Page({
         const c = citiesData.getByName(name) || { name: name, province: '', cuisine: '家常菜' };
         app.globalData.city = c;
         that.setData({ city: c, cityStatus: '当前环境无法自动定位，已默认「' + c.name + '」，点上方可切换' });
+        that.refreshHint();
         return;
       }
 
@@ -183,6 +255,7 @@ Page({
         if (!pick) return;
         app.setCity(pick);
         that.setData({ city: pick, cityStatus: '已按你确认的「' + pick.name + '」推荐' });
+        that.refreshHint();
       }
     });
   },
@@ -200,14 +273,30 @@ Page({
   },
 
   onPickPeople(e) {
-    const value = Number(e.currentTarget.dataset.value);
+    const value = this.clampPeople(e.currentTarget.dataset.value);
     this.setData({ people: value });
     app.globalData.people = value;
+    this.refreshMenu();
+    this.refreshHint();
+  },
+
+  /** 步进器：人多时快速加减（不受快捷选项限制） */
+  onPeopleStep(e) {
+    const delta = Number(e.currentTarget.dataset.delta) || 0;
+    const value = this.clampPeople(this.data.people + delta);
+    if (value === this.data.people) return;
+    this.setData({ people: value });
+    app.globalData.people = value;
+    this.refreshMenu();
+    this.refreshHint();
+    wx.vibrateShort && wx.vibrateShort({ type: 'light' });
   },
 
   onPickMeal(e) {
     const key = e.currentTarget.dataset.value;
     this.setData({ meal: key, mealLabel: recommender.MEAL_LABEL[key] || '一餐' });
+    this.refreshMenu();
+    this.refreshHint();
   },
 
   onPickSpicy(e) {
@@ -228,12 +317,29 @@ Page({
     this.setData({ 'pref.maxTime': value });
   },
 
+  onPickMode(e) {
+    const mode = e.currentTarget.dataset.value;
+    if (mode !== 'cook' && mode !== 'takeout') return;
+    this.setData({ mode: mode });
+    this.refreshHint();
+  },
+
+  onPickBudget(e) {
+    const value = e.currentTarget.dataset.value;
+    this.setData({ budget: value });
+    this.refreshHint();
+  },
+
   onStart() {
     const d = this.data;
     if (!d.city) {
       wx.showToast({ title: '请先选择城市', icon: 'none' });
       const that = this;
       setTimeout(function () { that.onChooseCity(); }, 700);
+      return;
+    }
+    if (d.mode === 'takeout') {
+      this.startTakeout();
       return;
     }
     wx.showLoading({ title: '正在搭配…', mask: true });
@@ -247,6 +353,7 @@ Page({
       app.globalData.lastResult = result;
       app.addHistory({
         id: result.id,
+        kind: 'cook',
         createdAt: result.createdAt,
         city: { name: d.city.name, province: d.city.province, cuisine: d.city.cuisine },
         people: d.people,
@@ -258,5 +365,17 @@ Page({
       });
       wx.navigateTo({ url: '/pages/result/result' });
     });
+  },
+
+  /** 进入「点外卖」分支：条件交给外卖页，由它负责定位与请求 */
+  startTakeout() {
+    const d = this.data;
+    app.globalData.takeoutQuery = {
+      people: d.people,
+      meal: d.meal,
+      mealLabel: d.mealLabel,
+      budget: d.budget
+    };
+    wx.navigateTo({ url: '/pages/takeout/takeout' });
   }
 });

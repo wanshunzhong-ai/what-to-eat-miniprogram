@@ -1,0 +1,126 @@
+<view class="page-wrap">
+  <!-- 当前条件 -->
+  <view class="cond-bar">
+    <view class="cond-item"><text class="cond-emoji">📍</text>{{cityName || '未定位'}}</view>
+    <view class="cond-item"><text class="cond-emoji">👥</text>{{query.people}} 人</view>
+    <view class="cond-item"><text class="cond-emoji">🍽️</text>{{query.mealLabel}}</view>
+  </view>
+
+  <!-- 品类筛选 -->
+  <scroll-view class="chip-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+    <view class="chip-row">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="pick-chip sm {{catKey === item.key ? 'pick-on' : ''}}"
+        data-value="{{item.key}}"
+        bindtap="onPickCat"
+      >{{item.emoji}}{{item.label}}</view>
+    </view>
+  </scroll-view>
+
+  <!-- 人均预算（只改排序，不重新请求） -->
+  <view class="budget-row">
+    <text class="budget-label">人均预算</text>
+    <view class="chip-row wrap flex-1">
+      <view
+        wx:for="{{budgets}}"
+        wx:key="key"
+        class="pick-chip xs {{budgetKey === item.key ? 'pick-on' : ''}}"
+        data-value="{{item.key}}"
+        bindtap="onPickBudget"
+      >{{item.label}}</view>
+    </view>
+  </view>
+
+  <!-- 加载中 -->
+  <view wx:if="{{state === 'loading' && !list.length}}" class="empty">
+    <text class="empty-emoji">🛵</text>
+    <view class="empty-text">正在找附近的店…</view>
+  </view>
+
+  <!-- 还没配置地图 Key -->
+  <block wx:elif="{{state === 'nokey'}}">
+    <view class="card notice">
+      <view class="notice-title">🛠️ 还差一步：接入地图服务</view>
+      <view class="notice-text">{{message}}</view>
+      <view class="notice-text">配置好之后，这里会直接列出你附近的真实店铺——店名、距离、地址、电话都有。</view>
+      <view class="notice-code">配置方式见项目 README 的「接入附近店铺」一节</view>
+    </view>
+    <block wx:if="{{fallbackFoods.length}}">
+      <view class="section-title">先看看{{cityName}}的人气美食</view>
+      <view class="food-wrap">
+        <view
+          class="food-chip"
+          wx:for="{{fallbackFoods}}"
+          wx:key="name"
+          data-name="{{item.name}}"
+          bindtap="onPickFallback"
+        >
+          <text class="food-emoji">{{item.emoji}}</text>
+          <text class="food-name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="tip-line">点一下会复制店名，去微信「搜一搜」就能找到附近的店</view>
+    </block>
+  </block>
+
+  <!-- 请求失败 -->
+  <view wx:elif="{{state === 'error'}}" class="empty">
+    <text class="empty-emoji">😵</text>
+    <view class="empty-text">{{message}}</view>
+    <button class="btn-ghost retry-btn" bindtap="onRetry">重试</button>
+  </view>
+
+  <!-- 没找到 -->
+  <view wx:elif="{{state === 'empty'}}" class="empty">
+    <text class="empty-emoji">🔍</text>
+    <view class="empty-text">{{message}}</view>
+    <button class="btn-ghost retry-btn" bindtap="onRetry">重新找找</button>
+  </view>
+
+  <!-- 结果 -->
+  <block wx:else>
+    <view class="list-head">
+      <text class="list-count">附近 {{list.length}} 家</text>
+      <text wx:if="{{radiusText}}" class="list-radius">{{radiusText}} · 按距离排序</text>
+    </view>
+
+    <view class="shop-card" wx:for="{{list}}" wx:key="id">
+      <view class="shop-top">
+        <view class="shop-emoji">{{item.catEmoji}}</view>
+        <view class="shop-main">
+          <view class="shop-name">{{item.name}}</view>
+          <view class="shop-meta">
+            <text class="mini-chip">{{item.catLabel}}</text>
+            <text wx:if="{{item.distanceText}}" class="shop-dist">{{item.distanceText}}</text>
+            <text wx:if="{{item.perHeadText}}" class="shop-price">参考人均 {{item.perHeadText}}</text>
+          </view>
+          <view wx:if="{{item.recommendReason}}" class="shop-why">💡 {{item.recommendReason}}</view>
+          <view wx:if="{{item.address}}" class="shop-addr">{{item.address}}</view>
+        </view>
+        <view
+          class="shop-fav {{item.faved ? 'faved' : ''}}"
+          data-id="{{item.id}}"
+          catchtap="onFav"
+        >{{item.faved ? '★' : '☆'}}</view>
+      </view>
+
+      <view class="shop-actions">
+        <view class="act" data-index="{{index}}" bindtap="onNavigate">🧭 导航</view>
+        <view wx:if="{{item.tel}}" class="act" data-tel="{{item.tel}}" bindtap="onCall">📞 打电话</view>
+        <view class="act" data-index="{{index}}" bindtap="onCopy">📋 复制地址</view>
+      </view>
+    </view>
+
+    <view wx:if="{{hasMore}}" class="more-wrap">
+      <button class="btn-ghost" bindtap="onMore">{{loading ? '加载中…' : '再看一些'}}</button>
+    </view>
+    <view wx:else class="muted end-hint">— 附近的店都看完啦 —</view>
+  </block>
+
+  <view class="footer-links">
+    <view class="footer-link" bindtap="goHome">‹ 返回改改条件</view>
+  </view>
+  <view class="safe-bottom"></view>
+</view>

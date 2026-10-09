@@ -25,6 +25,24 @@
     <text>定位失败也没关系，点上面手动选城市</text>
   </view>
 
+  <!-- 吃饭方式 -->
+  <view class="mode-switch">
+    <view class="mode-item {{mode === 'cook' ? 'mode-on' : ''}}" data-value="cook" bindtap="onPickMode">
+      <text class="mode-emoji">🍳</text>
+      <view class="mode-text">
+        <view class="mode-label">自己做</view>
+        <view class="mode-desc">推荐一桌菜 + 做法</view>
+      </view>
+    </view>
+    <view class="mode-item {{mode === 'takeout' ? 'mode-on' : ''}}" data-value="takeout" bindtap="onPickMode">
+      <text class="mode-emoji">🛵</text>
+      <view class="mode-text">
+        <view class="mode-label">点外卖</view>
+        <view class="mode-desc">推荐附近的店</view>
+      </view>
+    </view>
+  </view>
+
   <!-- 人数 -->
   <view class="section-title">几个人吃？</view>
   <scroll-view class="chip-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
@@ -38,6 +56,14 @@
       >{{item}}人</view>
     </view>
   </scroll-view>
+  <view class="people-step">
+    <text class="ps-tip">微调人数（最多 15 人）</text>
+    <view class="ps-ctrl">
+      <view class="ps-btn" data-delta="-1" bindtap="onPeopleStep">−</view>
+      <view class="ps-value">{{people}} 人</view>
+      <view class="ps-btn" data-delta="1" bindtap="onPeopleStep">＋</view>
+    </view>
+  </view>
 
   <!-- 餐次 -->
   <view class="section-title">哪一餐？</view>
@@ -51,43 +77,77 @@
     >{{item.label}}</view>
   </view>
 
-  <!-- 口味偏好 -->
-  <view class="section-title">口味偏好</view>
-  <view class="card pref-card">
-    <view class="pref-row">
-      <view class="pref-label">辣度</view>
-      <view class="chip-row wrap flex-1">
-        <view
-          wx:for="{{spicyOptions}}"
-          wx:key="value"
-          class="pick-chip sm {{pref.spicy === item.value ? 'pick-on' : ''}}"
-          data-value="{{item.value}}"
-          bindtap="onPickSpicy"
-        >{{item.label}}</view>
+  <!-- 一桌菜的配比建议（自己做模式） -->
+  <block wx:if="{{mode === 'cook'}}">
+    <view class="section-title">这一桌怎么配</view>
+    <view class="card menu-card">
+      <view class="mc-head">
+        <text class="mc-title">{{people}} 人 · {{mealLabel}}</text>
+        <text class="mc-count">共 {{menuTotal}} 道</text>
       </view>
-    </view>
-    <view class="pref-row">
-      <view class="pref-label">想清淡</view>
-      <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
-    </view>
-    <view class="pref-row">
-      <view class="pref-label">做菜时间</view>
-      <view class="chip-row wrap flex-1">
-        <view
-          wx:for="{{timeOptions}}"
-          wx:key="value"
-          class="pick-chip sm {{pref.maxTime === item.value ? 'pick-on' : ''}}"
-          data-value="{{item.value}}"
-          bindtap="onPickTime"
-        >{{item.label}}</view>
+      <view class="mc-tags">
+        <view wx:for="{{menuTags}}" wx:key="key" class="mc-tag tag-{{item.key}}">{{item.label}}</view>
       </view>
+      <view class="mc-text">{{menuText}}</view>
+      <view class="mc-tip">💡 {{menuTip}}</view>
     </view>
-  </view>
+  </block>
+
+  <!-- 自己做：口味偏好 -->
+  <block wx:if="{{mode === 'cook'}}">
+    <view class="section-title">口味偏好</view>
+    <view class="card pref-card">
+      <view class="pref-row">
+        <view class="pref-label">辣度</view>
+        <view class="chip-row wrap flex-1">
+          <view
+            wx:for="{{spicyOptions}}"
+            wx:key="value"
+            class="pick-chip sm {{pref.spicy === item.value ? 'pick-on' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="onPickSpicy"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="pref-row">
+        <view class="pref-label">想清淡</view>
+        <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
+      </view>
+      <view class="pref-row">
+        <view class="pref-label">做菜时间</view>
+        <view class="chip-row wrap flex-1">
+          <view
+            wx:for="{{timeOptions}}"
+            wx:key="value"
+            class="pick-chip sm {{pref.maxTime === item.value ? 'pick-on' : ''}}"
+            data-value="{{item.value}}"
+            bindtap="onPickTime"
+          >{{item.label}}</view>
+        </view>
+      </view>
+      <view class="pref-note">做菜时间只是偏好：优先推荐快手菜，凑不齐时不会把慢菜一刀切掉</view>
+    </view>
+  </block>
+
+  <!-- 点外卖：人均预算 -->
+  <block wx:else>
+    <view class="section-title">人均预算</view>
+    <view class="chip-row wrap">
+      <view
+        wx:for="{{budgetOptions}}"
+        wx:key="key"
+        class="pick-chip {{budget === item.key ? 'pick-on' : ''}}"
+        data-value="{{item.key}}"
+        bindtap="onPickBudget"
+      >{{item.label}}</view>
+    </view>
+    <view class="tip-line">会按「{{people}} 人 + 预算」给你排序推荐，进入后还能按品类筛（火锅 / 快餐 / 面食…）</view>
+  </block>
 
   <!-- 主按钮 -->
   <view class="start-wrap">
-    <button class="btn-primary" bindtap="onStart">😋 帮我决定吃什么</button>
-    <view class="start-hint">{{city ? ('为 ' + people + ' 人推荐一顿' + mealLabel + ' · ' + (city.cuisine || '家常菜') + '为主') : '先选择城市'}}</view>
+    <button class="btn-primary" bindtap="onStart">{{mode === 'takeout' ? '🛵 看看附近有什么' : '😋 帮我决定吃什么'}}</button>
+    <view class="start-hint">{{startHint}}</view>
   </view>
 
   <!-- 底部入口 -->

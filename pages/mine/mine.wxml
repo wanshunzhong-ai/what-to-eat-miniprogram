@@ -1,7 +1,7 @@
 <view class="page-wrap">
   <view class="hero">
     <view class="hero-title">我的</view>
-    <view class="hero-sub">偏好设置 · 收藏 · 历史</view>
+    <view class="hero-sub">收藏 · 历史 · 偏好</view>
   </view>
 
   <!-- 偏好 -->
@@ -39,26 +39,63 @@
 
   <!-- 收藏 -->
   <view class="section-head">
-    <view class="section-title">我的收藏 ({{favList.length}})</view>
+    <view class="section-title">我的收藏</view>
   </view>
-  <view wx:if="{{favList.length === 0}}" class="mini-empty">还没有收藏，进菜品详情页点个 ⭐ 吧</view>
-  <view class="fav-list" wx:else>
-    <view class="fav-item" wx:for="{{favList}}" wx:key="id" data-id="{{item.id}}" bindtap="onFavTap">
-      <text class="fav-emoji">{{item.emoji}}</text>
-      <view class="fav-body">
-        <view class="fav-name">{{item.name}}</view>
-        <view class="fav-sub">{{item.cuisine}} · {{item.category}}</view>
-      </view>
-      <text class="fav-arrow">›</text>
+  <view class="tab-bar">
+    <view class="tab-item {{tab === 'dish' ? 'tab-on' : ''}}" data-value="dish" bindtap="onSwitchTab">
+      🍽️ 菜品 ({{favList.length}})
+    </view>
+    <view class="tab-item {{tab === 'shop' ? 'tab-on' : ''}}" data-value="shop" bindtap="onSwitchTab">
+      🏪 店铺 ({{shopList.length}})
     </view>
   </view>
 
+  <!-- 菜品收藏 -->
+  <block wx:if="{{tab === 'dish'}}">
+    <view wx:if="{{favList.length === 0}}" class="mini-empty">还没有收藏菜品，进菜品详情页点个 ⭐ 吧</view>
+    <view class="fav-list" wx:else>
+      <view class="fav-item" wx:for="{{favList}}" wx:key="id" data-id="{{item.id}}" bindtap="onFavTap">
+        <text class="fav-emoji">{{item.emoji}}</text>
+        <view class="fav-body">
+          <view class="fav-name">{{item.name}}</view>
+          <view class="fav-sub">{{item.cuisine}} · {{item.category}}</view>
+        </view>
+        <text class="fav-arrow">›</text>
+      </view>
+    </view>
+  </block>
+
+  <!-- 店铺收藏 -->
+  <block wx:else>
+    <view wx:if="{{shopList.length === 0}}" class="mini-empty">还没有收藏店铺，去「点外卖」里点个 ☆ 吧</view>
+    <view class="shop-list" wx:else>
+      <view class="fav-item shop-item" wx:for="{{shopList}}" wx:key="id">
+        <text class="fav-emoji">{{item.catEmoji}}</text>
+        <view class="fav-body">
+          <view class="fav-name">{{item.name}}</view>
+          <view class="fav-sub">
+            <text wx:if="{{item.catLabel}}">{{item.catLabel}}</text>
+            <text wx:if="{{item.distanceText}}"> · {{item.distanceText}}</text>
+            <text wx:if="{{item.perHeadText}}"> · 参考人均 {{item.perHeadText}}</text>
+          </view>
+          <view wx:if="{{item.address}}" class="fav-addr">{{item.address}}</view>
+          <view class="shop-acts">
+            <text class="shop-act" data-index="{{index}}" catchtap="onShopNav">🧭 导航</text>
+            <text wx:if="{{item.tel}}" class="shop-act" data-tel="{{item.tel}}" catchtap="onShopCall">📞 打电话</text>
+            <text class="shop-act" data-index="{{index}}" catchtap="onShopCopy">📋 复制地址</text>
+            <text class="shop-act act-weak" data-index="{{index}}" catchtap="onUnfavShop">☆ 取消收藏</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
   <!-- 历史 -->
   <view class="section-head">
-    <view class="section-title">推荐历史 ({{historyList.length}})</view>
+    <view class="section-title">使用历史 ({{historyList.length}})</view>
     <text wx:if="{{historyList.length}}" class="clear-btn" bindtap="onClearHistory">清空</text>
   </view>
-  <view wx:if="{{historyList.length === 0}}" class="mini-empty">还没有记录，回首页点「帮我决定」试试</view>
+  <view wx:if="{{historyList.length === 0}}" class="mini-empty">还没有记录，回首页试试吧</view>
   <view class="his-list" wx:else>
     <view
       class="his-item"
@@ -68,11 +105,17 @@
       bindtap="onHistoryTap"
     >
       <view class="his-top">
-        <text class="his-title">{{item.people}}人 · {{item.mealLabel}}</text>
+        <view class="his-left">
+          <text class="his-kind {{item.kind === 'takeout' ? 'kind-takeout' : 'kind-cook'}}">{{item.kindEmoji}} {{item.kindLabel}}</text>
+          <text class="his-title">{{item.people}}人 · {{item.mealLabel}}</text>
+        </view>
         <text class="his-time">{{item.timeText}}</text>
       </view>
       <view class="his-city">{{item.cityName}} · {{item.cuisine}}</view>
-      <view class="his-dishes">{{item.dishText}}</view>
+      <view wx:if="{{item.kind === 'takeout'}}" class="his-dishes">
+        {{item.shopCount}} 家店：{{item.shopText}}
+      </view>
+      <view wx:else class="his-dishes">{{item.dishText}}</view>
     </view>
   </view>
 

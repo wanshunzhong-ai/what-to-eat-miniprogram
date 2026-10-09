@@ -11,6 +11,15 @@
       <view class="rh-summary">共 {{result.count}} 道 · 最长约 {{result.totalTime}} 分钟</view>
     </view>
 
+    <!-- 这一桌的配比建议 -->
+    <view class="plan-card">
+      <view class="plan-row">
+        <text class="plan-title">这一桌的配比</text>
+        <text class="plan-text">{{result.menuText}}</text>
+      </view>
+      <view class="plan-tip">{{result.menuTip}}</view>
+    </view>
+
     <!-- 菜品列表 -->
     <view class="dish-card" wx:for="{{result.dishes}}" wx:key="id" data-id="{{item.id}}" bindtap="onDish">
       <view class="dish-emoji">{{item.emoji}}</view>

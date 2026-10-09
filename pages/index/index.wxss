@@ -64,6 +64,50 @@
   padding-left: 12rpx;
 }
 
+/* 吃饭方式切换 */
+.mode-switch {
+  display: flex;
+  margin-top: 32rpx;
+  background: #F6F1EC;
+  border-radius: 28rpx;
+  padding: 10rpx;
+}
+.mode-item {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20rpx 12rpx;
+  border-radius: 22rpx;
+  transition: all .18s;
+}
+.mode-item.mode-on {
+  background: #fff;
+  box-shadow: 0 6rpx 18rpx rgba(255, 107, 53, 0.16);
+}
+.mode-emoji {
+  font-size: 40rpx;
+  margin-right: 14rpx;
+}
+.mode-text {
+  display: flex;
+  flex-direction: column;
+}
+.mode-label {
+  font-size: 29rpx;
+  font-weight: 700;
+  color: var(--text-sub);
+  line-height: 1.3;
+}
+.mode-item.mode-on .mode-label {
+  color: var(--primary-dark);
+}
+.mode-desc {
+  font-size: 21rpx;
+  color: var(--text-light);
+  line-height: 1.3;
+}
+
 /* 选择 chip */
 .chip-scroll {
   white-space: nowrap;
@@ -103,6 +147,118 @@
   box-shadow: 0 8rpx 18rpx rgba(255, 90, 31, 0.28);
 }
 
+/* 人数步进器 */
+.people-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 4rpx 0 8rpx;
+  padding: 0 4rpx;
+}
+.ps-tip {
+  font-size: 25rpx;
+  color: var(--text-light);
+}
+.ps-ctrl {
+  display: flex;
+  align-items: center;
+  background: #F6F1EC;
+  border-radius: 33rpx;
+  padding: 4rpx;
+}
+.ps-btn {
+  width: 60rpx;
+  height: 60rpx;
+  line-height: 60rpx;
+  text-align: center;
+  border-radius: 50%;
+  background: #fff;
+  color: var(--primary-dark);
+  font-size: 36rpx;
+  font-weight: 700;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.06);
+}
+.ps-value {
+  min-width: 130rpx;
+  text-align: center;
+  font-size: 29rpx;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* 一桌菜的配比建议 */
+.menu-card {
+  padding: 26rpx 28rpx;
+}
+.mc-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.mc-title {
+  font-size: 30rpx;
+  font-weight: 700;
+}
+.mc-count {
+  font-size: 25rpx;
+  color: var(--primary-dark);
+  font-weight: 600;
+}
+.mc-tags {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 18rpx;
+}
+.mc-tag {
+  height: 50rpx;
+  line-height: 50rpx;
+  padding: 0 20rpx;
+  border-radius: 25rpx;
+  font-size: 24rpx;
+  margin: 0 14rpx 14rpx 0;
+  background: #F6F1EC;
+  color: #6B615A;
+}
+.mc-tag.tag-cold {
+  background: #E8F2FF;
+  color: #2A6BB5;
+}
+.mc-tag.tag-meat {
+  background: #FFEDE6;
+  color: #C74A1E;
+}
+.mc-tag.tag-veg {
+  background: #E9F7EB;
+  color: #2C7A3D;
+}
+.mc-tag.tag-soup {
+  background: #FFF4E0;
+  color: #A56B12;
+}
+.mc-tag.tag-snack {
+  background: #FFF1F5;
+  color: #B03A63;
+}
+.mc-tag.tag-light {
+  background: #E9F5F3;
+  color: #2A7A6E;
+}
+.mc-tag.tag-staple {
+  background: #F1ECFB;
+  color: #5B4BA8;
+}
+.mc-text {
+  font-size: 25rpx;
+  color: var(--text-sub);
+  margin-top: 2rpx;
+}
+.mc-tip {
+  font-size: 23rpx;
+  color: var(--text-light);
+  margin-top: 12rpx;
+  line-height: 1.5;
+}
+
 /* 偏好卡 */
 .pref-card {
   padding: 12rpx 28rpx;
@@ -115,6 +271,12 @@
 }
 .pref-row:last-child {
   border-bottom: none;
+}
+.pref-note {
+  font-size: 22rpx;
+  color: var(--text-light);
+  padding: 4rpx 0 18rpx;
+  line-height: 1.5;
 }
 .pref-label {
   width: 140rpx;

@@ -65,6 +65,30 @@
   box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
 }
 
+/* 收藏分区切换 */
+.tab-bar {
+  display: flex;
+  background: #F6F1EC;
+  border-radius: 24rpx;
+  padding: 8rpx;
+  margin-bottom: 20rpx;
+}
+.tab-item {
+  flex: 1;
+  text-align: center;
+  font-size: 27rpx;
+  color: var(--text-sub);
+  padding: 16rpx 0;
+  border-radius: 18rpx;
+  transition: all .18s;
+}
+.tab-item.tab-on {
+  background: #fff;
+  color: var(--primary-dark);
+  font-weight: 700;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.14);
+}
+
 /* 收藏 */
 .fav-item {
   display: flex;
@@ -74,6 +98,9 @@
   padding: 22rpx 26rpx;
   margin-bottom: 14rpx;
   box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+}
+.fav-item.shop-item {
+  align-items: flex-start;
 }
 .fav-emoji {
   font-size: 46rpx;
@@ -92,9 +119,33 @@
   color: var(--text-light);
   margin-top: 4rpx;
 }
+.fav-addr {
+  font-size: 23rpx;
+  color: var(--text-light);
+  margin-top: 4rpx;
+  line-height: 1.45;
+}
 .fav-arrow {
   font-size: 40rpx;
   color: var(--text-light);
+}
+
+/* 店铺收藏的操作行 */
+.shop-acts {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 14rpx;
+}
+.shop-act {
+  font-size: 24rpx;
+  color: var(--primary-dark);
+  font-weight: 600;
+  padding: 8rpx 24rpx 8rpx 0;
+  margin-right: 10rpx;
+}
+.shop-act.act-weak {
+  color: var(--text-light);
+  font-weight: 400;
 }
 
 /* 历史 */
@@ -109,6 +160,26 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+}
+.his-left {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.his-kind {
+  font-size: 21rpx;
+  border-radius: 16rpx;
+  padding: 4rpx 14rpx;
+  margin-right: 14rpx;
+  flex: none;
+}
+.his-kind.kind-cook {
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+.his-kind.kind-takeout {
+  background: #E8F4FF;
+  color: #1F7AD8;
 }
 .his-title {
   font-size: 30rpx;

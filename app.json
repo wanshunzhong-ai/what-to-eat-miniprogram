@@ -4,7 +4,8 @@
     "pages/result/result",
     "pages/detail/detail",
     "pages/mine/mine",
-    "pages/city/city"
+    "pages/city/city",
+    "pages/takeout/takeout"
   ],
   "window": {
     "backgroundTextStyle": "dark",
@@ -15,7 +16,7 @@
   },
   "permission": {
     "scope.userLocation": {
-      "desc": "用于识别你所在的城市，为你推荐当地特色美食"
+      "desc": "用于识别你所在的城市、并查找附近的美食店铺"
     }
   },
   "requiredPrivateInfos": [

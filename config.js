@@ -10,5 +10,12 @@ module.exports = {
   ENV_ID: 'zws-04161130-l-d6gd7g8f0c8c7fb17',
 
   // 推荐云函数名（与 cloudfunctions/recommend 目录名一致）
-  RECOMMEND_FN: 'recommend'
+  RECOMMEND_FN: 'recommend',
+
+  // 附近美食店云函数名（与 cloudfunctions/nearby 目录名一致）
+  // 它代理腾讯位置服务的周边搜索；地图 Key 存在云函数环境变量 TENCENT_LBS_KEY 里，不下发到前端。
+  NEARBY_FN: 'nearby',
+
+  // 周边搜索半径（米）。结果太少时服务端会自动向外扩展，所以这里不必给太大。
+  NEARBY_RADIUS: 3000
 };

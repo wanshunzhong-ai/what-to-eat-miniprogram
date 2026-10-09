@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "附近的店",
+  "enablePullDownRefresh": true,
+  "backgroundColor": "#FFF7F1",
+  "backgroundTextStyle": "dark",
+  "usingComponents": {}
+}

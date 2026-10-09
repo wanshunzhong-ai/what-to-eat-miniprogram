@@ -5,7 +5,8 @@ const STORAGE = {
   CITY: 'eat_city',
   PREF: 'eat_pref',
   HISTORY: 'eat_history',
-  FAVORITES: 'eat_favorites'
+  FAVORITES: 'eat_favorites',
+  SHOP_FAVORITES: 'eat_shop_favorites'
 };
 
 App({
@@ -18,10 +19,14 @@ App({
     lastResult: null,
     // 最近一次定位坐标 { latitude, longitude, accuracy, at }，供城市选择页列出「离你最近的城市」
     lastLocation: null,
+    // 上一次「点外卖」的查询条件 { people, meal, budget, cat }，供外卖页读取与历史重跑
+    takeoutQuery: null,
     // 偏好 { spicy: -1不限 | 0不辣 | 1微辣 | 2中辣 | 3重辣, light: 是否清淡, maxTime: 最长烹饪时间(分钟), exclude: [] }
     pref: { spicy: -1, light: false, maxTime: 0, exclude: [] },
     history: [],
-    favorites: []
+    favorites: [],
+    // 收藏的店（点外卖分支）
+    shopFavorites: []
   },
 
   onLaunch() {
@@ -76,6 +81,10 @@ App({
       const favorites = wx.getStorageSync(STORAGE.FAVORITES);
       if (Array.isArray(favorites)) {
         this.globalData.favorites = favorites;
+      }
+      const shopFavorites = wx.getStorageSync(STORAGE.SHOP_FAVORITES);
+      if (Array.isArray(shopFavorites)) {
+        this.globalData.shopFavorites = shopFavorites;
       }
     } catch (e) {
       console.warn('读取缓存失败', e);
@@ -153,6 +162,46 @@ App({
 
   isFavorite(id) {
     return this.globalData.favorites.some(function (item) {
+      return item.id === id;
+    });
+  },
+
+  /** 收藏 / 取消收藏一家店，返回最新状态 */
+  toggleShopFavorite(shop) {
+    const list = this.globalData.shopFavorites.slice();
+    const idx = list.findIndex(function (item) {
+      return item.id === shop.id;
+    });
+    let added = false;
+    if (idx >= 0) {
+      list.splice(idx, 1);
+    } else {
+      list.unshift({
+        id: shop.id,
+        name: shop.name,
+        catLabel: shop.catLabel || '',
+        catEmoji: shop.catEmoji || '🍴',
+        address: shop.address || '',
+        tel: shop.tel || '',
+        perHeadText: shop.perHeadText || '',
+        distanceText: shop.distanceText || '',
+        lat: shop.lat,
+        lng: shop.lng,
+        savedAt: Date.now()
+      });
+      added = true;
+    }
+    this.globalData.shopFavorites = list;
+    try {
+      wx.setStorageSync(STORAGE.SHOP_FAVORITES, list);
+    } catch (e) {
+      console.warn('保存店铺收藏失败', e);
+    }
+    return added;
+  },
+
+  isShopFavorite(id) {
+    return this.globalData.shopFavorites.some(function (item) {
       return item.id === id;
     });
   }

@@ -26,6 +26,38 @@
   opacity: 0.92;
 }
 
+/* 这一桌的配比 */
+.plan-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 22rpx 26rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 6rpx 20rpx rgba(255, 107, 53, 0.08);
+}
+.plan-row {
+  display: flex;
+  align-items: baseline;
+}
+.plan-title {
+  flex: none;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--primary-dark);
+  margin-right: 16rpx;
+}
+.plan-text {
+  flex: 1;
+  font-size: 25rpx;
+  color: var(--text-sub);
+  line-height: 1.5;
+}
+.plan-tip {
+  font-size: 23rpx;
+  color: var(--text-light);
+  margin-top: 10rpx;
+  line-height: 1.5;
+}
+
 /* 菜品卡 */
 .dish-card {
   display: flex;
