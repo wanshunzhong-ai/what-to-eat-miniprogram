@@ -36,6 +36,50 @@
   margin-right: 12rpx;
 }
 
+/* 离你最近 */
+.near-hint {
+  font-size: 23rpx;
+  color: var(--text-light);
+  margin: -8rpx 0 16rpx;
+  line-height: 1.5;
+}
+.near-scroll {
+  white-space: nowrap;
+}
+.near-row {
+  display: inline-flex;
+  padding-bottom: 6rpx;
+}
+.near-item {
+  display: inline-block;
+  min-width: 150rpx;
+  margin-right: 16rpx;
+  padding: 20rpx 22rpx;
+  background: #fff;
+  border-radius: 20rpx;
+  text-align: center;
+  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.06);
+  border: 2rpx solid transparent;
+}
+.near-item.near-on {
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+.ni-name {
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.ni-dist {
+  font-size: 22rpx;
+  color: var(--primary-dark);
+  margin-top: 4rpx;
+}
+.ni-cuisine {
+  font-size: 21rpx;
+  color: var(--text-light);
+  margin-top: 2rpx;
+}
+
 /* 热门城市 */
 .hot-grid {
   display: flex;

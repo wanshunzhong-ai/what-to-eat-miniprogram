@@ -18,6 +18,27 @@
     <text>{{locating ? '定位中…' : '使用当前位置自动识别'}}</text>
   </view>
 
+  <!-- 离你最近（定位后出现，纠正识别结果最快的入口） -->
+  <block wx:if="{{nearList.length}}">
+    <view class="section-title">离你最近</view>
+    <view class="near-hint">{{nearHint}}</view>
+    <scroll-view class="near-scroll" scroll-x="true" enhanced="true" show-scrollbar="false">
+      <view class="near-row">
+        <view
+          wx:for="{{nearList}}"
+          wx:key="name"
+          class="near-item {{cityName === item.name ? 'near-on' : ''}}"
+          data-name="{{item.name}}"
+          bindtap="onPickCity"
+        >
+          <view class="ni-name">{{item.name}}</view>
+          <view class="ni-dist">{{item.distanceKm}} km</view>
+          <view class="ni-cuisine">{{item.cuisine}}</view>
+        </view>
+      </view>
+    </scroll-view>
+  </block>
+
   <!-- 热门城市 -->
   <block wx:if="{{!keyword}}">
     <view class="section-title">热门城市</view>

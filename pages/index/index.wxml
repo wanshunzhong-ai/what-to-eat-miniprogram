@@ -18,8 +18,11 @@
   </view>
 
   <view wx:if="{{locating}}" class="tip-line">正在获取你的位置…</view>
+  <view wx:elif="{{cityStatus}}" class="tip-line">
+    <text>{{cityStatus}}</text>
+  </view>
   <view wx:elif="{{!city}}" class="tip-line">
-    <text>{{cityStatus || '定位失败也没关系，点上面手动选城市'}}</text>
+    <text>定位失败也没关系，点上面手动选城市</text>
   </view>
 
   <!-- 人数 -->

@@ -1,4 +1,5 @@
 const config = require('./config.js');
+const wxapi = require('./utils/wxapi.js');
 
 const STORAGE = {
   CITY: 'eat_city',
@@ -15,6 +16,8 @@ App({
     city: null,
     // 上次推荐结果，供结果页读取
     lastResult: null,
+    // 最近一次定位坐标 { latitude, longitude, accuracy, at }，供城市选择页列出「离你最近的城市」
+    lastLocation: null,
     // 偏好 { spicy: -1不限 | 0不辣 | 1微辣 | 2中辣 | 3重辣, light: 是否清淡, maxTime: 最长烹饪时间(分钟), exclude: [] }
     pref: { spicy: -1, light: false, maxTime: 0, exclude: [] },
     history: [],
@@ -22,6 +25,12 @@ App({
   },
 
   onLaunch() {
+    // 先给运行环境缺失的 wx 接口补上兜底实现，避免页面生命周期被异常中断
+    try {
+      wxapi.install();
+    } catch (e) {
+      console.warn('[wxapi] 接口兜底失败，忽略', e);
+    }
     this.initCloud();
     this.restore();
   },
