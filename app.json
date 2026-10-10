@@ -20,7 +20,8 @@
     }
   },
   "requiredPrivateInfos": [
-    "getLocation"
+    "getLocation",
+    "getFuzzyLocation"
   ],
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",

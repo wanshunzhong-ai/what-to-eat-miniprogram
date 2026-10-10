@@ -39,13 +39,40 @@
     <view class="empty-text">正在找附近的店…</view>
   </view>
 
-  <!-- 还没配置地图 Key -->
-  <block wx:elif="{{state === 'nokey'}}">
+  <!-- 拿不到线上门店：说清是什么问题 + 人气美食兜底，不留死路 -->
+  <block wx:elif="{{state === 'notice'}}">
     <view class="card notice">
-      <view class="notice-title">🛠️ 还差一步：接入地图服务</view>
+      <view class="notice-title">{{noticeEmoji}} {{noticeTitle}}</view>
       <view class="notice-text">{{message}}</view>
-      <view class="notice-text">配置好之后，这里会直接列出你附近的真实店铺——店名、距离、地址、电话都有。</view>
-      <view class="notice-code">配置方式见项目 README 的「接入附近店铺」一节</view>
+      <view wx:if="{{noticeHint}}" class="notice-text">{{noticeHint}}</view>
+      <view wx:if="{{noticeCode}}" class="notice-code">{{noticeCode}}</view>
+    </view>
+    <button class="btn-ghost retry-btn" bindtap="onRetry">重试</button>
+
+    <block wx:if="{{fallbackFoods.length}}">
+      <view class="section-title">先看看{{cityName}}的人气美食</view>
+      <view class="food-wrap">
+        <view
+          class="food-chip"
+          wx:for="{{fallbackFoods}}"
+          wx:key="name"
+          data-name="{{item.name}}"
+          bindtap="onPickFallback"
+        >
+          <text class="food-emoji">{{item.emoji}}</text>
+          <text class="food-name">{{item.name}}</text>
+        </view>
+      </view>
+      <view class="tip-line">点一下会复制店名，去微信「搜一搜」就能找到附近的店</view>
+    </block>
+  </block>
+
+  <!-- 没找到 -->
+  <block wx:elif="{{state === 'empty'}}">
+    <view class="empty">
+      <text class="empty-emoji">🔍</text>
+      <view class="empty-text">{{message}}</view>
+      <button class="btn-ghost retry-btn" bindtap="onRetry">重新找找</button>
     </view>
     <block wx:if="{{fallbackFoods.length}}">
       <view class="section-title">先看看{{cityName}}的人气美食</view>
@@ -65,26 +92,14 @@
     </block>
   </block>
 
-  <!-- 请求失败 -->
-  <view wx:elif="{{state === 'error'}}" class="empty">
-    <text class="empty-emoji">😵</text>
-    <view class="empty-text">{{message}}</view>
-    <button class="btn-ghost retry-btn" bindtap="onRetry">重试</button>
-  </view>
-
-  <!-- 没找到 -->
-  <view wx:elif="{{state === 'empty'}}" class="empty">
-    <text class="empty-emoji">🔍</text>
-    <view class="empty-text">{{message}}</view>
-    <button class="btn-ghost retry-btn" bindtap="onRetry">重新找找</button>
-  </view>
-
   <!-- 结果 -->
   <block wx:else>
     <view class="list-head">
       <text class="list-count">附近 {{list.length}} 家</text>
       <text wx:if="{{radiusText}}" class="list-radius">{{radiusText}} · 按距离排序</text>
     </view>
+    <view wx:if="{{dataSourceText}}" class="src-note">{{dataSourceText}}</view>
+    <view wx:if="{{note}}" class="src-note">{{note}}</view>
 
     <view class="shop-card" wx:for="{{list}}" wx:key="id">
       <view class="shop-top">

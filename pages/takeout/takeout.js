@@ -18,9 +18,17 @@ Page({
     budgetKey: 'any',
     budgets: takeoutData.BUDGETS,
     list: [],
-    // loading 首次加载中 | ok 有结果 | empty 没结果 | nokey 未配置地图 Key | error 其他失败
+    // loading 首次加载中 | ok 有结果 | empty 没结果 | notice 拿不到线上数据（可诊断，附人气美食兜底）
     state: 'loading',
     message: '',
+    // notice 状态的卡片内容
+    noticeEmoji: '😵',
+    noticeTitle: '没拿到附近的店',
+    noticeHint: '',
+    noticeCode: '',
+    // 数据来源说明（腾讯地图 / OpenStreetMap）
+    dataSourceText: '',
+    note: '',
     loading: false,
     page: 1,
     hasMore: false,
@@ -104,8 +112,13 @@ Page({
         that._loading = false;
         that.setData({
           loading: false,
-          state: 'error',
-          message: '拿不到你的位置，无法查询附近的店。请在设置里允许定位后重试。'
+          state: 'notice',
+          noticeEmoji: '📍',
+          noticeTitle: '拿不到你的位置',
+          message: '没有定位就拿不到附近的店',
+          noticeHint: '请在微信的「设置 → 隐私 → 位置信息」里允许本小程序使用位置，然后重试。',
+          noticeCode: 'LOCATION_DENIED',
+          fallbackFoods: []
         });
         return;
       }
@@ -123,18 +136,66 @@ Page({
     });
   },
 
+  /** 把失败原因翻译成「说清是什么问题 + 该怎么办」的卡片文案 */
+  failureKind(res) {
+    const code = (res && res.code) || '';
+    const stage = (res && res.stage) || '';
+
+    // 云函数这一步就没调通（预览面板不支持云调用 / 云环境未绑定 / 网络不通）
+    if (stage === 'call' || code === 'CALL_FAIL' || code === 'NO_CLOUD') {
+      return {
+        emoji: '📡',
+        title: '云函数没调通',
+        hint: '附近门店要经云函数去请求地图服务，这一步失败了。若你在「预览面板」里看，它不支持云调用；' +
+              '请用微信开发者工具打开本项目（或真机体验）再试。'
+      };
+    }
+    // 地图数据源的问题
+    if (code === 'NO_KEY' || code === 'LBS_199' || code === 'LBS_113' || code === 'LBS_110' || code === 'LBS_190' || code === 'LBS_311') {
+      return {
+        emoji: '🔑',
+        title: '地图 Key 没生效',
+        hint: '给云函数 nearby 配置环境变量 TENCENT_LBS_KEY（腾讯位置服务 Key，需开通 WebServiceAPI）后即可拿到真实门店。'
+      };
+    }
+    if (code === 'LBS_120' || code === 'LBS_121') {
+      return {
+        emoji: '⏳',
+        title: '地图服务额度用完了',
+        hint: '腾讯位置服务的调用量或并发已达上限，稍后再试，或在控制台提升配额。'
+      };
+    }
+    if (/^OSM_/.test(code)) {
+      return {
+        emoji: '🌐',
+        title: '开源地图暂时不可用',
+        hint: '免密钥数据源（OpenStreetMap）这一会儿请求失败了，通常是限流，稍后重试即可。'
+      };
+    }
+    return {
+      emoji: '😵',
+      title: '没拿到附近的店',
+      hint: '可以点「重试」；如果一直不行，先看看下面的人气美食，或改用「自己做」模式。'
+    };
+  },
+
   applyResult(res, page) {
     if (!res || !res.ok) {
+      const kind = this.failureKind(res);
       const code = (res && res.code) || 'ERROR';
-      const isNoKey = code === 'NO_KEY' || code === 'LBS_199' || code === 'LBS_113' || code === 'LBS_110';
-      const that = this;
+      const debug = code + (res && res.errMsg ? ' · ' + res.errMsg : '');
       this.setData({
         loading: false,
-        state: isNoKey ? 'nokey' : 'error',
+        state: 'notice',
+        noticeEmoji: kind.emoji,
+        noticeTitle: kind.title,
         message: (res && res.message) || '获取附近的店失败',
+        noticeHint: (res && res.hint) || kind.hint,
+        noticeCode: debug,
         list: page === 1 ? [] : this.data.list,
         hasMore: false,
-        fallbackFoods: isNoKey ? that.buildFallback() : []
+        // 任何失败都给「人气美食」兜底，不让页面变成死路
+        fallbackFoods: this.buildFallback()
       });
       return;
     }
@@ -149,7 +210,11 @@ Page({
       message: list.length ? '' : '这一片没找到符合条件的店，换个品类或加大范围试试',
       list: list,
       page: page,
-      hasMore: raw.length >= PAGE_SIZE,
+      hasMore: raw.length >= PAGE_SIZE && res.exhausted !== true,
+      dataSourceText: res.dataSource === 'osm' ? '数据来自 OpenStreetMap' : (res.dataSource === 'tencent' ? '数据来自腾讯地图' : ''),
+      note: res.note || '',
+      // 线上没找到时，也拿人气美食垫一下
+      fallbackFoods: list.length ? [] : this.buildFallback(),
       radiusText: res.radius
         ? (res.radius >= 1000 ? (res.radius / 1000) + ' 公里内' : res.radius + ' 米内')
         : ''

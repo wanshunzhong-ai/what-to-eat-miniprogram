@@ -300,3 +300,11 @@
   font-size: 26rpx;
   padding: 12rpx 28rpx;
 }
+
+/* 数据来源说明 */
+.src-note {
+  margin: -6rpx 4rpx 16rpx;
+  font-size: 23rpx;
+  color: var(--text-light);
+  line-height: 1.6;
+}

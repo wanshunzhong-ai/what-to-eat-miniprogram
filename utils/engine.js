@@ -86,7 +86,10 @@ function nearbyPlaces(opts) {
       resolve({
         ok: false,
         code: 'NO_CLOUD',
-        message: '附近店铺需要联网获取，请检查网络或云开发配置',
+        stage: 'cloud',
+        message: '当前运行环境用不了云函数，拿不到附近的店',
+        hint: '附近门店要经由云函数请求地图服务。若你在「预览面板」里看，它并不支持云调用；' +
+              '请用微信开发者工具打开本项目（或在真机上体验）再试。',
         list: []
       });
       return;
@@ -101,30 +104,39 @@ function nearbyPlaces(opts) {
           resolve({
             ok: true,
             source: 'cloud',
+            dataSource: r.source || '',   // tencent | osm
+            note: r.note || '',
             count: r.count,
             list: r.list || [],
             page: r.page,
             radius: r.radius,
-            keyword: r.keyword
+            keyword: r.keyword,
+            exhausted: !!r.exhausted
           });
           return;
         }
         resolve({
           ok: false,
           source: 'cloud',
+          stage: 'server',
           code: (r && r.code) || 'EMPTY',
           message: (r && r.message) || '没有获取到附近的店',
+          errors: (r && r.errors) || [],
           list: []
         });
       },
       fail(err) {
-        console.warn('[engine] 附近店铺查询失败', err && err.errMsg ? err.errMsg : err);
+        const errMsg = (err && (err.errMsg || err.message)) || '';
+        console.warn('[engine] 附近店铺查询失败', errMsg || err);
         resolve({
           ok: false,
           source: 'cloud',
+          stage: 'call',
           code: 'CALL_FAIL',
-          message: '网络请求失败，请稍后重试',
-          errMsg: err && err.errMsg,
+          message: '调用云函数失败' + (errMsg ? '：' + errMsg : ''),
+          hint: '常见原因：预览面板不支持云调用、云环境未绑定到当前小程序、或网络不通。' +
+                '建议用微信开发者工具打开本项目验证。',
+          errMsg: errMsg,
           list: []
         });
       }
