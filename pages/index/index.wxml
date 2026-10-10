@@ -1,12 +1,12 @@
-<view class="page-wrap">
+<view class="page-wrap has-dock">
   <!-- 顶部问候 -->
-  <view class="hero">
+  <view class="hero anim-up">
     <view class="hero-title">{{greeting}}</view>
-    <view class="hero-sub">纠结吃什么？交给我来决定 👇</view>
+    <view class="hero-sub">纠结吃什么？交给我来决定</view>
   </view>
 
   <!-- 定位城市 -->
-  <view class="card city-card" bindtap="onChooseCity">
+  <view class="card city-card anim-up d1" hover-class="hv-card" bindtap="onChooseCity">
     <view class="city-left">
       <view class="city-pin {{city ? 'pin-on' : ''}}">📍</view>
       <view class="city-text">
@@ -26,15 +26,25 @@
   </view>
 
   <!-- 吃饭方式 -->
-  <view class="mode-switch">
-    <view class="mode-item {{mode === 'cook' ? 'mode-on' : ''}}" data-value="cook" bindtap="onPickMode">
+  <view class="mode-switch anim-up d2">
+    <view
+      class="mode-item {{mode === 'cook' ? 'mode-on' : ''}}"
+      data-value="cook"
+      hover-class="hv"
+      bindtap="onPickMode"
+    >
       <text class="mode-emoji">🍳</text>
       <view class="mode-text">
         <view class="mode-label">自己做</view>
         <view class="mode-desc">推荐一桌菜 + 做法</view>
       </view>
     </view>
-    <view class="mode-item {{mode === 'takeout' ? 'mode-on' : ''}}" data-value="takeout" bindtap="onPickMode">
+    <view
+      class="mode-item {{mode === 'takeout' ? 'mode-on' : ''}}"
+      data-value="takeout"
+      hover-class="hv"
+      bindtap="onPickMode"
+    >
       <text class="mode-emoji">🛵</text>
       <view class="mode-text">
         <view class="mode-label">点外卖</view>
@@ -52,6 +62,7 @@
         wx:key="*this"
         class="pick-chip {{people === item ? 'pick-on' : ''}}"
         data-value="{{item}}"
+        hover-class="hv"
         bindtap="onPickPeople"
       >{{item}}人</view>
     </view>
@@ -59,9 +70,9 @@
   <view class="people-step">
     <text class="ps-tip">微调人数（最多 15 人）</text>
     <view class="ps-ctrl">
-      <view class="ps-btn" data-delta="-1" bindtap="onPeopleStep">−</view>
+      <view class="ps-btn" data-delta="-1" hover-class="hv" bindtap="onPeopleStep">−</view>
       <view class="ps-value">{{people}} 人</view>
-      <view class="ps-btn" data-delta="1" bindtap="onPeopleStep">＋</view>
+      <view class="ps-btn" data-delta="1" hover-class="hv" bindtap="onPeopleStep">＋</view>
     </view>
   </view>
 
@@ -73,6 +84,7 @@
       wx:key="key"
       class="pick-chip {{meal === item.key ? 'pick-on' : ''}}"
       data-value="{{item.key}}"
+      hover-class="hv"
       bindtap="onPickMeal"
     >{{item.label}}</view>
   </view>
@@ -105,13 +117,14 @@
             wx:key="value"
             class="pick-chip sm {{pref.spicy === item.value ? 'pick-on' : ''}}"
             data-value="{{item.value}}"
+            hover-class="hv"
             bindtap="onPickSpicy"
           >{{item.label}}</view>
         </view>
       </view>
-      <view class="pref-row">
+      <view class="pref-row pref-row-last">
         <view class="pref-label">想清淡</view>
-        <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
+        <switch class="pref-switch" checked="{{pref.light}}" color="#F26B3A" bindchange="onToggleLight" />
       </view>
       <view class="pref-note">推荐按「人数 + 口味」来配：人数决定一桌几凉几热、荤素汤饭怎么搭，口味决定挑哪几道菜。</view>
     </view>
@@ -126,21 +139,22 @@
         wx:key="key"
         class="pick-chip {{budget === item.key ? 'pick-on' : ''}}"
         data-value="{{item.key}}"
+        hover-class="hv"
         bindtap="onPickBudget"
       >{{item.label}}</view>
     </view>
     <view class="tip-line">会按「{{people}} 人 + 预算」给你排序推荐，进入后还能按品类筛（火锅 / 快餐 / 面食…）</view>
   </block>
 
-  <!-- 主按钮 -->
-  <view class="start-wrap">
-    <button class="btn-primary" bindtap="onStart">{{mode === 'takeout' ? '🛵 看看附近有什么' : '😋 帮我决定吃什么'}}</button>
-    <view class="start-hint">{{startHint}}</view>
-  </view>
-
-  <!-- 底部入口 -->
+  <!-- 次级入口 -->
   <view class="footer-links">
-    <view class="footer-link" bindtap="goMine">⭐ 我的收藏 / 历史</view>
-    <view class="footer-link" bindtap="onRelocate">🎯 重新定位</view>
+    <view class="footer-link" hover-class="hv" bindtap="goMine">⭐ 我的收藏 / 历史</view>
+    <view class="footer-link" hover-class="hv" bindtap="onRelocate">🎯 重新定位</view>
   </view>
+</view>
+
+<!-- 吸底主按钮：滚到哪都能一键开始 -->
+<view class="dock">
+  <view class="dock-hint">{{startHint}}</view>
+  <button class="btn-primary" bindtap="onStart">{{mode === 'takeout' ? '🛵 看看附近有什么' : '😋 帮我决定吃什么'}}</button>
 </view>

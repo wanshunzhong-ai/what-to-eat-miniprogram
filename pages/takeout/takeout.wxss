@@ -1,8 +1,6 @@
-.page-wrap {
-  padding-top: 24rpx;
-}
+/* pages/takeout/takeout.wxss — 点外卖 */
 
-/* 当前条件条 */
+/* ---------- 当前条件 ---------- */
 .cond-bar {
   display: flex;
   align-items: center;
@@ -12,64 +10,23 @@
 .cond-item {
   display: flex;
   align-items: center;
-  font-size: 26rpx;
-  color: var(--text-sub);
-  background: #F6F1EC;
-  border-radius: 22rpx;
+  font-size: 24rpx;
+  color: var(--ink-2);
+  background: var(--sunken);
+  border-radius: var(--r-pill);
   padding: 8rpx 22rpx;
-  margin: 0 14rpx 14rpx 0;
+  margin: 0 12rpx 12rpx 0;
 }
 .cond-emoji {
   margin-right: 8rpx;
 }
 
-/* 品类 chip */
+/* 品类 chip 行的 .chip-scroll / .chip-row / .pick-chip 由 app.wxss 统一提供 */
 .chip-scroll {
-  white-space: nowrap;
-  width: 100%;
   margin-top: 10rpx;
 }
-.chip-row {
-  display: flex;
-  align-items: center;
-  flex-wrap: nowrap;
-}
-.chip-row.wrap {
-  flex-wrap: wrap;
-}
-.pick-chip {
-  flex: none;
-  height: 66rpx;
-  line-height: 66rpx;
-  padding: 0 30rpx;
-  border-radius: 33rpx;
-  background: #F6F1EC;
-  color: #6B615A;
-  font-size: 28rpx;
-  margin: 0 16rpx 16rpx 0;
-  transition: all .15s;
-}
-.pick-chip.sm {
-  height: 62rpx;
-  line-height: 62rpx;
-  padding: 0 26rpx;
-  font-size: 26rpx;
-}
-.pick-chip.xs {
-  height: 54rpx;
-  line-height: 54rpx;
-  padding: 0 22rpx;
-  font-size: 24rpx;
-  margin-bottom: 12rpx;
-}
-.pick-on {
-  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
-  color: #fff;
-  font-weight: 600;
-  box-shadow: 0 8rpx 18rpx rgba(255, 90, 31, 0.28);
-}
 
-/* 预算行 */
+/* ---------- 预算行 ---------- */
 .budget-row {
   display: flex;
   align-items: flex-start;
@@ -80,38 +37,72 @@
 .budget-label {
   flex: none;
   width: 130rpx;
-  font-size: 26rpx;
-  color: var(--text-sub);
+  font-size: 25rpx;
+  color: var(--ink-3);
   line-height: 54rpx;
 }
-.flex-1 {
-  flex: 1;
-  min-width: 0;
-}
 
-/* 结果表头 */
+/* ---------- 结果表头 ---------- */
 .list-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  margin: 34rpx 4rpx 18rpx;
+  margin: 34rpx 4rpx 12rpx;
 }
 .list-count {
-  font-size: 32rpx;
-  font-weight: 700;
+  font-size: 30rpx;
+  font-weight: 600;
 }
 .list-radius {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
 }
 
-/* 店铺卡片 */
+/* ---------- 加载骨架 ---------- */
+.sk-wrap {
+  padding-top: 34rpx;
+}
+.sk-card {
+  display: flex;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 26rpx;
+  margin-bottom: 20rpx;
+}
+.sk-avatar {
+  width: 76rpx;
+  height: 76rpx;
+  flex: none;
+  border-radius: var(--r-md);
+  margin-right: 20rpx;
+}
+.sk-body {
+  flex: 1;
+  padding-top: 4rpx;
+}
+.sk-line {
+  height: 24rpx;
+  margin-bottom: 16rpx;
+}
+.sk-line:last-child {
+  margin-bottom: 0;
+}
+.sk-tip {
+  text-align: center;
+  font-size: 23rpx;
+  color: var(--ink-4);
+  padding: 24rpx 0;
+}
+
+/* ---------- 店铺卡 ---------- */
 .shop-card {
   background: var(--card);
-  border-radius: 28rpx;
-  box-shadow: var(--shadow);
-  padding: 26rpx 28rpx 20rpx;
-  margin-bottom: 22rpx;
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  padding: 26rpx 26rpx 0;
+  margin-bottom: 20rpx;
 }
 .shop-top {
   display: flex;
@@ -121,12 +112,12 @@
   flex: none;
   width: 76rpx;
   height: 76rpx;
-  border-radius: 22rpx;
+  border-radius: var(--r-md);
   background: var(--primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 38rpx;
+  font-size: 36rpx;
   margin-right: 20rpx;
 }
 .shop-main {
@@ -134,8 +125,8 @@
   min-width: 0;
 }
 .shop-name {
-  font-size: 32rpx;
-  font-weight: 700;
+  font-size: 31rpx;
+  font-weight: 600;
   line-height: 1.35;
 }
 .shop-meta {
@@ -145,36 +136,85 @@
   margin-top: 10rpx;
 }
 .mini-chip {
-  font-size: 22rpx;
-  color: var(--primary-dark);
+  font-size: 21rpx;
+  color: var(--primary-ink);
   background: var(--primary-soft);
-  border-radius: 18rpx;
+  border-radius: var(--r-pill);
   padding: 4rpx 16rpx;
-  margin-right: 14rpx;
+  margin-right: 12rpx;
 }
 .shop-dist {
-  font-size: 24rpx;
-  color: var(--text-sub);
-  margin-right: 14rpx;
+  font-size: 23rpx;
+  color: var(--ink-3);
+  margin-right: 12rpx;
 }
 .shop-price {
-  font-size: 24rpx;
-  color: var(--text-light);
+  font-size: 23rpx;
+  color: var(--ink-4);
+}
+
+/* ---- 配送信息（近似版）：四格等宽统计条 ---- */
+.deliver-row {
+  display: flex;
+  align-items: stretch;
+  margin-top: 14rpx;
+  border-radius: var(--r-sm);
+  background: var(--sunken);
+  overflow: hidden;
+}
+.dl {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12rpx 4rpx;
+  border-right: 1rpx solid #E4E7EA;
+}
+.dl:last-child {
+  border-right: none;
+}
+.dl-k {
+  font-size: 20rpx;
+  color: var(--ink-4);
+  line-height: 1.3;
+}
+.dl-v {
+  font-size: 23rpx;
+  color: var(--ink);
+  font-weight: 600;
+  line-height: 1.4;
+}
+.dl-v.rate {
+  color: var(--primary-ink);
+}
+
+.range-warn {
+  margin-top: 12rpx;
+  font-size: 22rpx;
+  color: var(--danger);
+  line-height: 1.5;
 }
 .shop-why {
   margin-top: 12rpx;
-  font-size: 24rpx;
-  color: var(--primary-dark);
-  background: #FFF4EC;
-  border-radius: 14rpx;
+  font-size: 23rpx;
+  color: var(--primary-ink);
+  background: var(--primary-soft);
+  border-radius: var(--r-sm);
   padding: 10rpx 16rpx;
-  line-height: 1.45;
+  line-height: 1.5;
+}
+.order-hint {
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: var(--ink-3);
+  line-height: 1.5;
 }
 .shop-addr {
   margin-top: 10rpx;
-  font-size: 24rpx;
-  color: var(--text-light);
-  line-height: 1.45;
+  font-size: 23rpx;
+  color: var(--ink-4);
+  line-height: 1.5;
 }
 .shop-fav {
   flex: none;
@@ -182,55 +222,75 @@
   height: 60rpx;
   line-height: 60rpx;
   text-align: center;
-  font-size: 40rpx;
-  color: #D9CFC6;
+  font-size: 38rpx;
+  color: var(--ink-4);
   margin-left: 8rpx;
 }
 .shop-fav.faved {
-  color: var(--accent);
+  color: var(--gold);
 }
 
-/* 卡片底部操作 */
+/* 卡片底部操作：三等分，用竖线分隔而不是留白 */
 .shop-actions {
   display: flex;
   align-items: center;
   margin-top: 20rpx;
-  padding-top: 18rpx;
   border-top: 1rpx solid var(--line);
 }
 .act {
   flex: 1;
   text-align: center;
-  font-size: 25rpx;
-  color: var(--primary-dark);
-  font-weight: 600;
+  padding: 22rpx 0;
+  font-size: 24rpx;
+  color: var(--ink-2);
+  font-weight: 500;
+  border-right: 1rpx solid var(--line);
+}
+.act:last-child {
+  border-right: none;
 }
 
-/* 未配置 Key 的提示卡 */
+.est-note {
+  margin: 12rpx 0 18rpx;
+  padding: 16rpx 20rpx;
+  border-radius: var(--r-sm);
+  background: var(--sunken);
+  color: var(--ink-3);
+  font-size: 22rpx;
+  line-height: 1.6;
+}
+.src-note {
+  margin: -6rpx 4rpx 12rpx;
+  font-size: 22rpx;
+  color: var(--ink-4);
+  line-height: 1.6;
+}
+
+/* ---------- 未配置 Key 的提示卡 ---------- */
 .notice {
-  border-left: 8rpx solid var(--accent);
+  border-left: 8rpx solid var(--primary);
 }
 .notice-title {
-  font-size: 31rpx;
-  font-weight: 700;
-  margin-bottom: 14rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  margin-bottom: 12rpx;
 }
 .notice-text {
-  font-size: 25rpx;
-  color: var(--text-sub);
+  font-size: 24rpx;
+  color: var(--ink-3);
   line-height: 1.6;
   margin-top: 8rpx;
 }
 .notice-code {
   margin-top: 16rpx;
-  font-size: 23rpx;
-  color: var(--text-light);
-  background: #F6F1EC;
-  border-radius: 14rpx;
+  font-size: 22rpx;
+  color: var(--ink-4);
+  background: var(--sunken);
+  border-radius: var(--r-sm);
   padding: 12rpx 16rpx;
 }
 
-/* 兜底人气美食 */
+/* ---------- 兜底人气美食 ---------- */
 .food-wrap {
   display: flex;
   flex-wrap: wrap;
@@ -239,34 +299,36 @@
   display: flex;
   align-items: center;
   background: var(--card);
-  border-radius: 26rpx;
-  box-shadow: var(--shadow);
-  padding: 18rpx 26rpx;
-  margin: 0 16rpx 16rpx 0;
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-pill);
+  box-shadow: var(--sh-1);
+  padding: 16rpx 26rpx;
+  margin: 0 14rpx 14rpx 0;
 }
 .food-emoji {
   margin-right: 10rpx;
-  font-size: 28rpx;
+  font-size: 26rpx;
 }
 .food-name {
-  font-size: 27rpx;
-  font-weight: 600;
+  font-size: 26rpx;
+  font-weight: 500;
 }
 
-/* 空态 / 失败 */
+/* ---------- 空态 / 失败 ---------- */
 .empty {
   text-align: center;
   padding: 110rpx 0 40rpx;
-  color: var(--text-light);
+  color: var(--ink-4);
 }
 .empty-emoji {
   font-size: 92rpx;
   display: block;
   margin-bottom: 22rpx;
+  opacity: 0.85;
 }
 .empty-text {
-  font-size: 27rpx;
-  color: var(--text-sub);
+  font-size: 26rpx;
+  color: var(--ink-3);
   padding: 0 40rpx;
   line-height: 1.6;
 }
@@ -276,10 +338,11 @@
 }
 
 .tip-line {
-  font-size: 24rpx;
-  color: var(--text-light);
+  font-size: 23rpx;
+  color: var(--ink-4);
   margin-top: 16rpx;
-  padding-left: 12rpx;
+  padding-left: 6rpx;
+  line-height: 1.5;
 }
 
 .more-wrap {
@@ -296,15 +359,7 @@
   margin-top: 34rpx;
 }
 .footer-link {
-  color: var(--text-sub);
-  font-size: 26rpx;
-  padding: 12rpx 28rpx;
-}
-
-/* 数据来源说明 */
-.src-note {
-  margin: -6rpx 4rpx 16rpx;
-  font-size: 23rpx;
-  color: var(--text-light);
-  line-height: 1.6;
+  color: var(--ink-3);
+  font-size: 25rpx;
+  padding: 14rpx 26rpx;
 }

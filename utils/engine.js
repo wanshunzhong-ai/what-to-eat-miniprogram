@@ -34,13 +34,22 @@ function recommend(opts) {
       return;
     }
 
+    // 带上偏好的本地改动时间：云端据此判断该不该更新它记住的口味，
+    // 避免「新手机上刚改的」被别处的旧请求覆盖。
+    let prefUpdatedAt = 0;
+    try {
+      const ts = app && typeof app.readSyncTs === 'function' ? app.readSyncTs() : null;
+      if (ts && ts.pref) prefUpdatedAt = ts.pref;
+    } catch (e) {}
+
     wx.cloud.callFunction({
       name: config.RECOMMEND_FN,
       data: {
         city: opts.city,
         people: opts.people,
         meal: opts.meal,
-        pref: opts.pref
+        pref: opts.pref,
+        prefUpdatedAt: prefUpdatedAt
       },
       success(res) {
         const r = res && res.result;

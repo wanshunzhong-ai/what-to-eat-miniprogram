@@ -1,45 +1,21 @@
+/* pages/mine/mine.wxss — 我的 */
+
+/* ---------- 页头 ---------- */
 .hero {
-  padding: 24rpx 8rpx 20rpx;
+  padding: 24rpx 6rpx 20rpx;
 }
 .hero-title {
   font-size: 50rpx;
   font-weight: 700;
+  letter-spacing: -1rpx;
 }
 .hero-sub {
   margin-top: 10rpx;
-  color: var(--text-sub);
-  font-size: 27rpx;
+  color: var(--ink-3);
+  font-size: 26rpx;
 }
 
-/* 偏好 */
-.pref-card {
-  padding: 12rpx 28rpx;
-}
-.pref-row {
-  display: flex;
-  align-items: center;
-  padding: 18rpx 0;
-  border-bottom: 1rpx solid var(--line);
-}
-.pref-row:last-child {
-  border-bottom: none;
-}
-.pref-label {
-  width: 140rpx;
-  flex: none;
-  color: var(--text-sub);
-  font-size: 27rpx;
-}
-.pref-switch {
-  transform: scale(0.85);
-  transform-origin: left center;
-}
-.flex-1 {
-  flex: 1;
-  min-width: 0;
-}
-
-/* 分区标题（带右侧操作） */
+/* ---------- 分区标题（带右侧操作） ---------- */
 .section-head {
   display: flex;
   align-items: center;
@@ -50,84 +26,96 @@
   margin: 0;
 }
 .clear-btn {
-  font-size: 25rpx;
-  color: var(--text-sub);
+  font-size: 24rpx;
+  color: var(--ink-3);
   padding: 8rpx 16rpx;
 }
 
 .mini-empty {
-  font-size: 25rpx;
-  color: var(--text-light);
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 40rpx;
+  font-size: 24rpx;
+  color: var(--ink-4);
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 44rpx 32rpx;
   text-align: center;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+  line-height: 1.6;
 }
 
-/* 收藏分区切换 */
+/* ---------- 收藏分区切换 ---------- */
 .tab-bar {
   display: flex;
-  background: #F6F1EC;
-  border-radius: 24rpx;
-  padding: 8rpx;
+  background: var(--sunken);
+  border-radius: var(--r-md);
+  padding: 6rpx;
   margin-bottom: 20rpx;
 }
 .tab-item {
   flex: 1;
   text-align: center;
-  font-size: 27rpx;
-  color: var(--text-sub);
+  font-size: 26rpx;
+  color: var(--ink-3);
   padding: 16rpx 0;
-  border-radius: 18rpx;
-  transition: all .18s;
+  border-radius: var(--r-sm);
+  transition: background 0.18s, color 0.18s;
 }
 .tab-item.tab-on {
-  background: #fff;
-  color: var(--primary-dark);
-  font-weight: 700;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.14);
+  background: var(--card);
+  color: var(--ink);
+  font-weight: 600;
+  box-shadow: var(--sh-1);
 }
 
-/* 收藏 */
+/* ---------- 收藏项 ---------- */
 .fav-item {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 22rpx;
-  padding: 22rpx 26rpx;
-  margin-bottom: 14rpx;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 22rpx 24rpx;
+  margin-bottom: 12rpx;
+  box-shadow: var(--sh-1);
+  transition: background 0.15s;
 }
 .fav-item.shop-item {
   align-items: flex-start;
 }
 .fav-emoji {
-  font-size: 46rpx;
-  margin-right: 22rpx;
+  font-size: 42rpx;
+  margin-right: 20rpx;
 }
 .fav-body {
   flex: 1;
   min-width: 0;
 }
 .fav-name {
-  font-size: 31rpx;
+  font-size: 30rpx;
   font-weight: 600;
 }
 .fav-sub {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
   margin-top: 4rpx;
 }
 .fav-addr {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
   margin-top: 4rpx;
   line-height: 1.45;
 }
+.fav-deli {
+  font-size: 22rpx;
+  color: var(--ink-3);
+  margin-top: 4rpx;
+  line-height: 1.45;
+}
+.fav-out {
+  color: var(--danger);
+}
 .fav-arrow {
-  font-size: 40rpx;
-  color: var(--text-light);
+  font-size: 34rpx;
+  color: var(--ink-4);
 }
 
 /* 店铺收藏的操作行 */
@@ -137,24 +125,26 @@
   margin-top: 14rpx;
 }
 .shop-act {
-  font-size: 24rpx;
-  color: var(--primary-dark);
-  font-weight: 600;
+  font-size: 23rpx;
+  color: var(--primary-ink);
+  font-weight: 500;
   padding: 8rpx 24rpx 8rpx 0;
   margin-right: 10rpx;
 }
 .shop-act.act-weak {
-  color: var(--text-light);
+  color: var(--ink-4);
   font-weight: 400;
 }
 
-/* 历史 */
+/* ---------- 历史 ---------- */
 .his-item {
-  background: #fff;
-  border-radius: 22rpx;
-  padding: 24rpx 26rpx;
-  margin-bottom: 14rpx;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 24rpx;
+  margin-bottom: 12rpx;
+  box-shadow: var(--sh-1);
+  transition: background 0.15s;
 }
 .his-top {
   display: flex;
@@ -168,76 +158,105 @@
 }
 .his-kind {
   font-size: 21rpx;
-  border-radius: 16rpx;
+  border-radius: var(--r-pill);
   padding: 4rpx 14rpx;
   margin-right: 14rpx;
   flex: none;
 }
 .his-kind.kind-cook {
   background: var(--primary-soft);
-  color: var(--primary-dark);
+  color: var(--primary-ink);
 }
 .his-kind.kind-takeout {
-  background: #E8F4FF;
-  color: #1F7AD8;
+  background: var(--blue-soft);
+  color: #1D6FC4;
 }
 .his-title {
-  font-size: 30rpx;
-  font-weight: 700;
+  font-size: 29rpx;
+  font-weight: 600;
 }
 .his-time {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
 }
 .his-city {
-  font-size: 24rpx;
-  color: var(--primary-dark);
+  font-size: 23rpx;
+  color: var(--primary-ink);
   margin-top: 8rpx;
 }
 .his-dishes {
-  font-size: 25rpx;
-  color: var(--text-sub);
+  font-size: 24rpx;
+  color: var(--ink-3);
   margin-top: 8rpx;
   line-height: 1.5;
 }
 
-/* 菜品库卡片 */
+/* ---------- 信息卡（菜品库 / 云端同步共用） ---------- */
 .lib-card {
-  padding: 20rpx 28rpx 24rpx;
+  padding: 16rpx 28rpx 24rpx;
+}
+.sync-card {
+  padding: 16rpx 28rpx 24rpx;
 }
 .lib-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 14rpx 0;
+  padding: 16rpx 0;
   border-bottom: 1rpx solid var(--line);
 }
+.lib-row:last-of-type {
+  border-bottom: none;
+}
 .lib-label {
-  color: var(--text-sub);
-  font-size: 27rpx;
+  color: var(--ink-3);
+  font-size: 26rpx;
 }
 .lib-value {
-  color: var(--text);
-  font-size: 27rpx;
+  color: var(--ink);
+  font-size: 26rpx;
   font-weight: 600;
 }
 .lib-tip {
   margin-top: 18rpx;
-  color: var(--text-light);
-  font-size: 23rpx;
+  color: var(--ink-4);
+  font-size: 22rpx;
   line-height: 1.6;
 }
 .lib-btn {
   margin-top: 22rpx;
-  height: 76rpx;
-  line-height: 76rpx;
+  height: 78rpx;
+  line-height: 78rpx;
   text-align: center;
-  border-radius: 38rpx;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
-  font-size: 28rpx;
-  font-weight: 600;
+  border-radius: var(--r-pill);
+  background: var(--sunken);
+  color: var(--ink-2);
+  font-size: 27rpx;
+  font-weight: 500;
+  transition: background 0.15s;
 }
 .lib-btn-busy {
-  opacity: 0.6;
+  opacity: 0.55;
+}
+
+/* 同步状态圆点 */
+.sync-state {
+  display: flex;
+  align-items: center;
+}
+.state-dot {
+  width: 14rpx;
+  height: 14rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+.dot-ok {
+  background: var(--green);
+}
+.dot-bad {
+  background: var(--danger);
+}
+.sync-bad {
+  color: var(--danger);
+  font-weight: 600;
 }

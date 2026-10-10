@@ -1,130 +1,260 @@
-/* app.wxss - 全局样式与主题 */
+/* app.wxss — 全局设计系统与主题（清爽现代风）
+ *
+ * 设计原则：
+ *   1) 中性灰阶打底，橙色只做「强调」——选中态、关键按钮、一处点缀，不做大面积铺色
+ *   2) 白卡 + 1rpx 细描边 + 极浅阴影，取代原来的重投影，观感更轻
+ *   3) 字号 / 圆角 / 阴影 / 间距全部收敛成 token，页面里不再出现魔法数字
+ *   4) 所有可点元素都有按压反馈（hover-class），首屏分区依次淡入
+ */
+
 page {
-  --bg: #FFF7F1;
+  /* ---------- 中性灰阶 ---------- */
+  --bg: #F5F6F7;
   --card: #FFFFFF;
-  --primary: #FF6B35;
-  --primary-dark: #E8531C;
-  --primary-soft: #FFEDE3;
-  --accent: #FFB800;
-  --text: #2B2622;
-  --text-sub: #8C8177;
-  --text-light: #B6ACA3;
-  --line: #F2E7DE;
-  --green: #34C77B;
-  --shadow: 0 6rpx 24rpx rgba(255, 107, 53, 0.10);
+  --sunken: #F2F4F5;
+
+  --ink: #17191C;
+  --ink-2: #545C64;
+  --ink-3: #868E96;
+  --ink-4: #ADB5BD;
+
+  --line: #EDEFF1;
+  --line-strong: #E2E5E8;
+
+  /* ---------- 品牌点缀色（橙色只用于强调） ---------- */
+  --primary: #F26B3A;
+  --primary-ink: #C2410C;
+  --primary-soft: #FFF3ED;
+  --primary-line: #F9D9C8;
+
+  /* ---------- 语义色 ---------- */
+  --green: #12B76A;
+  --danger: #E5484D;
+  --danger-soft: #FDEDED;
+  --gold: #F5A524;
+  --blue-soft: #EDF4FE;
+
+  /* ---------- 圆角 ---------- */
+  --r-sm: 12rpx;
+  --r-md: 20rpx;
+  --r-lg: 28rpx;
+  --r-xl: 36rpx;
+  --r-pill: 999rpx;
+
+  /* ---------- 阴影（只留两级，克制） ---------- */
+  --sh-1: 0 1rpx 2rpx rgba(23, 25, 28, 0.03), 0 4rpx 12rpx rgba(23, 25, 28, 0.045);
+  --sh-primary: 0 8rpx 20rpx rgba(242, 107, 58, 0.26);
 
   background-color: var(--bg);
-  color: var(--text);
+  color: var(--ink);
   font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", Helvetica, "Microsoft YaHei", sans-serif;
   font-size: 28rpx;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-view, text, button, input, scroll-view {
+view, text, button, input, scroll-view, navigator {
   box-sizing: border-box;
 }
 
 .page-wrap {
   min-height: 100vh;
-  padding: 0 32rpx 60rpx;
+  padding: 0 32rpx 64rpx;
 }
 
-/* 卡片 */
+/* ==================== 卡片 ==================== */
 .card {
   background: var(--card);
-  border-radius: 28rpx;
-  box-shadow: var(--shadow);
-  padding: 32rpx;
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  box-shadow: var(--sh-1);
+  padding: 30rpx;
 }
 
-/* 主按钮 */
+/* 不需要阴影的卡片（列表里连续排布时更干净） */
+.card-flat {
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 30rpx;
+}
+
+/* ==================== 按钮 ==================== */
 .btn-primary {
   width: 100%;
-  height: 100rpx;
-  line-height: 100rpx;
-  border-radius: 50rpx;
-  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
-  color: #fff;
-  font-size: 34rpx;
-  font-weight: 600;
-  text-align: center;
+  height: 96rpx;
+  line-height: 96rpx;
+  padding: 0;
   border: none;
-  box-shadow: 0 10rpx 24rpx rgba(255, 90, 31, 0.32);
+  border-radius: var(--r-pill);
+  background: var(--primary);
+  color: #fff;
+  font-size: 32rpx;
+  font-weight: 600;
+  letter-spacing: 1rpx;
+  text-align: center;
+  box-shadow: var(--sh-primary);
 }
 .btn-primary::after { border: none; }
-
 .btn-primary.btn-disabled {
-  background: #E6DCD4;
+  background: #DFE3E6;
   color: #fff;
   box-shadow: none;
 }
 
 .btn-ghost {
   height: 88rpx;
-  line-height: 88rpx;
-  border-radius: 44rpx;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
-  font-size: 30rpx;
+  line-height: 86rpx;
+  padding: 0;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink-2);
+  font-size: 28rpx;
+  font-weight: 500;
   text-align: center;
-  border: none;
+  border: 1rpx solid var(--line-strong);
 }
 .btn-ghost::after { border: none; }
 
-/* 小标签 */
+/* button 默认按下态会盖一层灰底，这里统一改成「轻微变淡」，去掉脏灰 */
+button.button-hover { opacity: 0.85; }
+button.button-hover.btn-primary { background-color: var(--primary); }
+button.button-hover.btn-ghost { background-color: #F7F8F9; }
+
+/* ==================== 小标签 ==================== */
 .chip {
   display: inline-flex;
   align-items: center;
   height: 44rpx;
   padding: 0 20rpx;
-  border-radius: 22rpx;
-  font-size: 24rpx;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
+  border-radius: var(--r-pill);
+  font-size: 23rpx;
+  background: var(--sunken);
+  color: var(--ink-2);
   margin-right: 12rpx;
   margin-bottom: 12rpx;
 }
-.chip.chip-plain {
-  background: #F6F1EC;
-  color: var(--text-sub);
+.chip.chip-plain { background: var(--sunken); color: var(--ink-3); }
+.chip.chip-brand { background: var(--primary-soft); color: var(--primary-ink); }
+.chip.chip-spicy { background: var(--danger-soft); color: #C62A2F; }
+
+/* ==================== 可选 chip（首页 / 外卖 / 我的 共用，避免各页重复定义） ==================== */
+.chip-scroll { white-space: nowrap; width: 100%; }
+.chip-row { display: flex; align-items: center; flex-wrap: nowrap; }
+.chip-row.wrap { flex-wrap: wrap; }
+.pick-chip {
+  flex: none;
+  height: 68rpx;
+  line-height: 66rpx;
+  padding: 0 30rpx;
+  border-radius: var(--r-pill);
+  background: var(--sunken);
+  color: var(--ink-2);
+  font-size: 27rpx;
+  margin: 0 14rpx 14rpx 0;
+  border: 1rpx solid transparent;
+  transition: background 0.16s, color 0.16s, border-color 0.16s;
 }
-.chip.chip-spicy {
-  background: #FFECEC;
-  color: #E53935;
+.pick-chip.sm {
+  height: 60rpx;
+  line-height: 58rpx;
+  padding: 0 24rpx;
+  font-size: 25rpx;
+  margin-bottom: 12rpx;
+}
+.pick-chip.xs {
+  height: 54rpx;
+  line-height: 52rpx;
+  padding: 0 22rpx;
+  font-size: 24rpx;
+  margin-bottom: 12rpx;
+}
+.pick-on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  box-shadow: 0 4rpx 12rpx rgba(242, 107, 58, 0.22);
 }
 
-/* 通用文本 */
-.title-lg { font-size: 44rpx; font-weight: 700; letter-spacing: 1rpx; }
+/* ==================== 文本层级 ==================== */
+.t-hero { font-size: 52rpx; font-weight: 700; letter-spacing: -1rpx; line-height: 1.25; }
+.t-h1 { font-size: 42rpx; font-weight: 700; letter-spacing: -0.5rpx; line-height: 1.3; }
+.t-h2 { font-size: 32rpx; font-weight: 600; }
+.title-lg { font-size: 44rpx; font-weight: 700; }
 .title { font-size: 34rpx; font-weight: 700; }
-.sub { color: var(--text-sub); font-size: 26rpx; }
-.muted { color: var(--text-light); font-size: 24rpx; }
+.sub { color: var(--ink-3); font-size: 26rpx; }
+.muted { color: var(--ink-4); font-size: 23rpx; }
 
+/* ==================== 分区标题 ==================== */
 .section-title {
   display: flex;
   align-items: center;
-  font-size: 32rpx;
-  font-weight: 700;
-  margin: 40rpx 0 24rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--ink);
+  margin: 44rpx 0 22rpx;
 }
 .section-title::before {
   content: '';
-  width: 8rpx;
-  height: 32rpx;
-  border-radius: 4rpx;
+  width: 6rpx;
+  height: 26rpx;
+  border-radius: 3rpx;
   background: var(--primary);
-  margin-right: 16rpx;
+  margin-right: 14rpx;
 }
 
+/* ==================== 布局 ==================== */
 .row { display: flex; align-items: center; }
 .between { display: flex; align-items: center; justify-content: space-between; }
+.flex-1 { flex: 1; min-width: 0; }
 
-/* 空态 */
+/* ==================== 空态 ==================== */
 .empty {
   text-align: center;
   padding: 120rpx 0;
-  color: var(--text-light);
+  color: var(--ink-4);
 }
-.empty .empty-emoji { font-size: 96rpx; display: block; margin-bottom: 24rpx; }
+.empty .empty-emoji {
+  font-size: 92rpx;
+  display: block;
+  margin-bottom: 24rpx;
+  opacity: 0.85;
+}
 
-/* 安全区 */
+/* ==================== 按压反馈（配合 hover-class） ==================== */
+.hv { opacity: 0.6; }
+.hv-soft { background: #EBEEF0 !important; }
+.hv-card { background: #FAFBFC !important; }
+
+/* ==================== 入场动效 ==================== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-up { animation: fadeUp 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) both; }
+.anim-in { animation: fadeIn 0.3s ease both; }
+.d1 { animation-delay: 0.05s; }
+.d2 { animation-delay: 0.1s; }
+.d3 { animation-delay: 0.15s; }
+.d4 { animation-delay: 0.2s; }
+.d5 { animation-delay: 0.25s; }
+.d6 { animation-delay: 0.3s; }
+
+/* ==================== 骨架屏 ==================== */
+.sk {
+  background: linear-gradient(90deg, #EEF0F2 25%, #F7F8F9 37%, #EEF0F2 63%);
+  background-size: 400% 100%;
+  animation: skShine 1.4s ease infinite;
+  border-radius: var(--r-sm);
+}
+@keyframes skShine {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+/* ==================== 安全区 ==================== */
 .safe-bottom { padding-bottom: calc(24rpx + env(safe-area-inset-bottom)); }

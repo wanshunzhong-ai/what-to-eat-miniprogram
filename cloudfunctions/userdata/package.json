@@ -1,0 +1,9 @@
+{
+  "name": "userdata",
+  "version": "1.0.0",
+  "description": "今天吃什么 - 用户数据云函数：按 OPENID 同步口味偏好 / 收藏 / 历史（CloudBase PostgreSQL）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

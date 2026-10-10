@@ -20,6 +20,14 @@ module.exports = {
   // 它代理腾讯位置服务的周边搜索；地图 Key 存在云函数环境变量 TENCENT_LBS_KEY 里，不下发到前端。
   NEARBY_FN: 'nearby',
 
+  // 用户数据云同步开关。开启后收藏 / 店铺收藏 / 历史 / 口味偏好会按微信身份存到云端，
+  // 换手机登录同一个微信即可自动恢复。断网时自动退化为纯本地，不影响使用。
+  ENABLE_SYNC: true,
+
+  // 用户数据云函数名（与 cloudfunctions/userdata 目录名一致）
+  // 身份取自云函数里的微信上下文（OPENID），前端不传 openid，用户之间天然隔离。
+  USERDATA_FN: 'userdata',
+
   // 周边搜索半径（米）。结果太少时服务端会自动向外扩展，所以这里不必给太大。
   NEARBY_RADIUS: 3000
 };

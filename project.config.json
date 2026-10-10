@@ -15,6 +15,10 @@
         "type": "folder"
       },
       {
+        "value": "cloudbase",
+        "type": "folder"
+      },
+      {
         "value": ".workbuddy",
         "type": "folder"
       }

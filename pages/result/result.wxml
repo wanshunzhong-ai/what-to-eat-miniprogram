@@ -1,7 +1,7 @@
 <block wx:if="{{result}}">
   <view class="page-wrap">
-    <!-- 头部 -->
-    <view class="result-hero">
+    <!-- 头部：浅暖渐变卡，橙色只做点缀 -->
+    <view class="result-hero anim-up">
       <view class="rh-label">今天为你推荐</view>
       <view class="rh-title">{{result.people}} 人 · {{result.mealLabel}}</view>
       <view class="rh-tags">
@@ -12,7 +12,7 @@
     </view>
 
     <!-- 这一桌的配比建议 -->
-    <view class="plan-card">
+    <view class="plan-card anim-up d1">
       <view class="plan-row">
         <text class="plan-title">这一桌的配比</text>
         <text class="plan-text">{{result.menuText}}</text>
@@ -21,7 +21,14 @@
     </view>
 
     <!-- 菜品列表 -->
-    <view class="dish-card" wx:for="{{result.dishes}}" wx:key="id" data-id="{{item.id}}" bindtap="onDish">
+    <view
+      class="dish-card"
+      wx:for="{{result.dishes}}"
+      wx:key="id"
+      data-id="{{item.id}}"
+      hover-class="hv-card"
+      bindtap="onDish"
+    >
       <view class="dish-emoji">{{item.emoji}}</view>
       <view class="dish-body">
         <view class="dish-top">
@@ -39,11 +46,23 @@
       <view class="dish-arrow">›</view>
     </view>
 
-    <!-- 操作 -->
-    <view class="action-row">
-      <button class="btn-ghost flex-1" bindtap="onChange">🔄 换一批</button>
-      <button class="btn-ghost flex-1" open-type="share">📤 分享</button>
+    <!-- 操作：三个次级动作一行，分享单独整行做主视觉 -->
+    <view class="action-grid">
+      <view class="act-btn" hover-class="hv-soft" bindtap="onChange">
+        <text class="act-ico">🔄</text>
+        <text class="act-txt">换一批</text>
+      </view>
+      <view class="act-btn" hover-class="hv-soft" bindtap="onCopyMenu">
+        <text class="act-ico">📋</text>
+        <text class="act-txt">复制清单</text>
+      </view>
+      <view class="act-btn" hover-class="hv-soft" bindtap="onSaveMenuImage">
+        <text class="act-ico">🖼️</text>
+        <text class="act-txt">存成图片</text>
+      </view>
     </view>
+    <button class="btn-primary share-btn" open-type="share">📤 分享给同吃的朋友</button>
+    <view class="share-hint">分享出去的是这一桌的菜单，朋友点开就能看到，不用截图。</view>
 
     <!-- 本地人气美食 -->
     <view class="section-title">{{result.city.name}}必吃 · 本地人气</view>
@@ -61,13 +80,16 @@
     </view>
 
     <!-- 返回首页 -->
-    <view class="back-home" bindtap="backHome">返回首页重新选 →</view>
+    <view class="back-home" hover-class="hv" bindtap="backHome">返回首页重新选 →</view>
     <view class="safe-bottom"></view>
   </view>
 </block>
 
-<view wx:else class="empty">
+<view wx:else class="empty anim-in">
   <text class="empty-emoji">🍽️</text>
   <text>还没有推荐结果</text>
-  <view class="go-home" bindtap="backHome">回到首页</view>
+  <view class="go-home" hover-class="hv" bindtap="backHome">回到首页</view>
 </view>
+
+<!-- 生成「点菜清单」图片用的画布，藏在页面背后 -->
+<canvas type="2d" id="menuCanvas" class="menu-canvas"></canvas>

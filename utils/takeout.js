@@ -127,13 +127,125 @@ function perHeadText(key) {
   return '¥' + ph[0] + '-' + ph[1];
 }
 
+// ---------------------------------------------------------------- 配送估算
+//
+// ⚠️ 说明：地图接口（腾讯位置服务 / OpenStreetMap）**不返回**起送价、配送费、时效和评分，
+//    这些字段只有美团 / 饿了么的开放平台才有。所以这里做的是「近似版」：
+//      - 先按店铺品类给出一个合理区间，再用店铺 id 的稳定哈希在区间里取值
+//        → 同一家店每次打开看到的数字都一样，不会乱跳；
+//      - 页面上统一以「约 / 估」标注，并在列表顶部注明这不是平台报价。
+//    想换成真实数据，只需在 decorateShop 里用平台返回值覆盖这几个字段即可。
+
+/** 各品类的配送画像：起送价区间[最低,最高]、配送半径(米)、出餐准备(分钟) */
+const DELIVERY_PROFILE = {
+  breakfast: { minOrder: [12, 20], radius: 2500, prep: 12 },
+  fastfood:  { minOrder: [15, 25], radius: 3000, prep: 15 },
+  noodle:    { minOrder: [15, 25], radius: 3000, prep: 15 },
+  rice:      { minOrder: [15, 25], radius: 3000, prep: 15 },
+  snack:     { minOrder: [12, 22], radius: 2500, prep: 12 },
+  stirfry:   { minOrder: [30, 50], radius: 4000, prep: 25 },
+  hotpot:    { minOrder: [50, 90], radius: 5000, prep: 35 },
+  bbq:       { minOrder: [40, 70], radius: 4500, prep: 30 },
+  dessert:   { minOrder: [12, 20], radius: 2500, prep: 12 },
+  west:      { minOrder: [40, 70], radius: 4500, prep: 28 },
+  japan:     { minOrder: [50, 90], radius: 4500, prep: 30 },
+  korea:     { minOrder: [45, 80], radius: 4500, prep: 30 },
+  other:     { minOrder: [20, 40], radius: 3000, prep: 20 }
+};
+
+/** 品类热度基准（0~1），只用来让「人气参考」有点区分度，不代表真实销量 */
+const CAT_HEAT = {
+  fastfood: 0.9, noodle: 0.88, rice: 0.88, snack: 0.85, breakfast: 0.8,
+  hotpot: 0.92, bbq: 0.9, stirfry: 0.82, dessert: 0.8,
+  west: 0.6, japan: 0.62, korea: 0.6, other: 0.6
+};
+
+/** 字符串 → 稳定正整数（同一家店永远得到同一个种子） */
+function seedOf(str) {
+  let h = 2166136261;
+  const s = String(str || '');
+  for (let i = 0; i < s.length; i++) {
+    h ^= s.charCodeAt(i);
+    h = (h * 16777619) >>> 0;
+  }
+  return h >>> 0;
+}
+
+/** 在 [lo, hi] 里按种子取一个整数 */
+function pickInt(lo, hi, seed, salt) {
+  if (hi <= lo) return lo;
+  return lo + ((seed + salt * 7919) % (hi - lo + 1));
+}
+
+function clamp(v, lo, hi) {
+  return v < lo ? lo : (v > hi ? hi : v);
+}
+
+/**
+ * 估算一家店的配送信息。
+ * 数据来自品类经验值 + 距离，**不是**平台真实报价，页面需如实标注。
+ * @param {Object} shop   { id, distanceM, tel, address }
+ * @param {String} catKey 品类 key
+ */
+function deliveryEstimate(shop, catKey) {
+  const p = DELIVERY_PROFILE[catKey] || DELIVERY_PROFILE.other;
+  const seed = seedOf((shop && shop.id) || (shop && shop.name) || 'x');
+  const dist = (typeof shop.distanceM === 'number' && isFinite(shop.distanceM)) ? shop.distanceM : null;
+
+  // 起送价：品类区间内取整到 5 的倍数，看起来更像真实定价
+  const rawMin = pickInt(p.minOrder[0], p.minOrder[1], seed, 1);
+  const minOrder = Math.max(10, Math.round(rawMin / 5) * 5);
+
+  // 配送费：起步 2~4 元，每超 1 公里加 1 元
+  const base = pickInt(2, 4, seed, 2);
+  const extraKm = dist === null ? 0 : Math.max(0, Math.ceil((dist - 1000) / 1000));
+  const deliveryFee = clamp(base + extraKm, 2, 12);
+
+  // 预计送达：出餐准备 + 路上（约 400 米 1 分钟），封顶 75 分钟
+  const eta = dist === null
+    ? p.prep + 15
+    : clamp(p.prep + Math.round(dist / 400), p.prep + 5, 75);
+
+  // 配送范围：品类的常规配送半径
+  const inRange = dist === null ? true : dist <= p.radius;
+
+  // 人气参考：品类热度 + 距离 + 信息完整度，最后落在 3.0~5.0
+  let rating = 3.2 + (CAT_HEAT[catKey] || 0.6) * 1.2;
+  if (dist !== null) {
+    if (dist <= 1000) rating += 0.35;
+    else if (dist <= 2500) rating += 0.15;
+    else rating -= 0.15;
+  }
+  if (shop && shop.tel) rating += 0.12;
+  if (shop && shop.address && String(shop.address).length > 6) rating += 0.1;
+  rating += ((seed % 7) - 3) * 0.06;   // 稳定的小抖动，避免整条街分数一样
+  rating = Math.round(clamp(rating, 3.0, 5.0) * 10) / 10;
+
+  return {
+    minOrder: minOrder,
+    minOrderText: '¥' + minOrder,
+    deliveryFee: deliveryFee,
+    deliveryFeeText: '¥' + deliveryFee,
+    eta: eta,
+    etaText: '约 ' + eta + ' 分钟',
+    inRange: inRange,
+    radius: p.radius,
+    radiusText: p.radius >= 1000 ? (p.radius / 1000) + ' 公里' : p.radius + ' 米',
+    rating: rating,
+    ratingText: rating.toFixed(1)
+  };
+}
+
 // ---------------------------------------------------------------- 打分
 
 /**
- * 给一家店打分：品类是否符合人数、参考人均是否落在预算内。
+ * 给一家店打分：品类是否符合人数、参考人均是否落在预算内、配送是否够得着。
  * 只做排序权重，不直接决定留存（结果太少时仍会展示）。
+ * @param {String} catKey
+ * @param {Object} query { people, budget }
+ * @param {Object} [est] deliveryEstimate 的结果（可选）
  */
-function scoreShop(catKey, query) {
+function scoreShop(catKey, query, est) {
   const q = query || {};
   let score = 0;
 
@@ -150,6 +262,12 @@ function scoreShop(catKey, query) {
       const overlap = Math.min(ph[1], b.max) - Math.max(ph[0], b.min);
       score += overlap > 0 ? 18 : -22;
     }
+  }
+
+  // 配送适配：人气参考高的排前面；超出配送半径的排后面（但不剔除，用户可能愿意自取）
+  if (est) {
+    score += (est.rating - 4) * 8;
+    if (!est.inRange) score -= 12;
   }
   return score;
 }
@@ -185,6 +303,18 @@ function recommendReason(catKey, query) {
 function decorateShop(shop, query, isFav) {
   const catKey = inferCat(shop);
   const cat = catInfo(catKey);
+  const est = deliveryEstimate(shop, catKey);
+  const p = Number(query && query.people) || 1;
+
+  // 按这个人数点，大概率凑不满起送价 → 给一句实用提醒
+  let orderHint = '';
+  const ph = cat.perHead;
+  if (ph && ph[0] > 0 && p * ph[0] < est.minOrder) {
+    orderHint = p <= 1
+      ? '一个人可能凑不满起送价，建议拼单'
+      : '按 ' + p + ' 人点，差不多能凑够起送价';
+  }
+
   return {
     id: shop.id,
     name: shop.name,
@@ -201,7 +331,20 @@ function decorateShop(shop, query, isFav) {
     lat: shop.lat,
     lng: shop.lng,
     recommendReason: recommendReason(catKey, query),
-    faved: isFav ? !!isFav(shop.id) : false
+    faved: isFav ? !!isFav(shop.id) : false,
+
+    // ---- 以下为配送信息（近似版，非平台报价） ----
+    minOrder: est.minOrder,
+    minOrderText: est.minOrderText,
+    deliveryFee: est.deliveryFee,
+    deliveryFeeText: est.deliveryFeeText,
+    eta: est.eta,
+    etaText: est.etaText,
+    inRange: est.inRange,
+    rangeText: est.radiusText,
+    rating: est.rating,
+    ratingText: est.ratingText,
+    orderHint: orderHint
   };
 }
 
@@ -211,7 +354,9 @@ function decorateShop(shop, query, isFav) {
  */
 function rankAndDecorate(list, query, isFav) {
   const arr = (list || []).map(function (shop) {
-    return { shop: shop, catKey: inferCat(shop), score: scoreShop(inferCat(shop), query) };
+    const catKey = inferCat(shop);
+    const est = deliveryEstimate(shop, catKey);
+    return { shop: shop, catKey: catKey, est: est, score: scoreShop(catKey, query, est) };
   });
 
   arr.sort(function (a, b) {
@@ -253,6 +398,7 @@ module.exports = {
   catInfo: catInfo,
   formatDistance: formatDistance,
   perHeadText: perHeadText,
+  deliveryEstimate: deliveryEstimate,
   scoreShop: scoreShop,
   recommendReason: recommendReason,
   decorateShop: decorateShop,

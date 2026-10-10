@@ -13,7 +13,7 @@
   </view>
 
   <!-- 定位按钮 -->
-  <view class="locate-btn" bindtap="onUseLocation">
+  <view class="locate-btn" hover-class="hv-soft" bindtap="onUseLocation">
     <text class="locate-emoji">🎯</text>
     <text>{{locating ? '定位中…' : '使用当前位置自动识别'}}</text>
   </view>
@@ -29,6 +29,7 @@
           wx:key="name"
           class="near-item {{cityName === item.name ? 'near-on' : ''}}"
           data-name="{{item.name}}"
+          hover-class="hv-card"
           bindtap="onPickCity"
         >
           <view class="ni-name">{{item.name}}</view>
@@ -48,6 +49,7 @@
         wx:key="name"
         class="hot-item {{cityName === item.name ? 'hot-on' : ''}}"
         data-name="{{item.name}}"
+        hover-class="hv-card"
         bindtap="onPickCity"
       >
         <view class="hot-name">{{item.name}}</view>
@@ -67,6 +69,7 @@
     wx:key="name"
     class="city-item"
     data-name="{{item.name}}"
+    hover-class="hv-card"
     bindtap="onPickCity"
   >
     <view class="ci-left">

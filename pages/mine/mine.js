@@ -1,6 +1,7 @@
 const app = getApp();
 const engine = require('../../utils/engine.js');
 const dishStore = require('../../utils/dishStore.js');
+const userStore = require('../../utils/userStore.js');
 const wxapi = require('../../utils/wxapi.js');
 
 const SPICY_OPTIONS = [
@@ -74,7 +75,12 @@ Page({
     dishLib: null,
     dishLibSourceText: '',
     dishLibTimeText: '',
-    dishLibSyncing: false
+    dishLibSyncing: false,
+    // 云端同步状态
+    syncBusy: false,
+    syncStatusText: '尚未同步',
+    syncTimeText: '尚未同步',
+    syncError: ''
   },
 
   onShow() {
@@ -83,6 +89,7 @@ Page({
 
   refresh() {
     const meta = app.globalData.dishLib || dishStore.meta();
+    const sync = this.syncView();
     this.setData({
       favList: app.globalData.favorites.slice(),
       shopList: app.globalData.shopFavorites.slice(),
@@ -90,7 +97,39 @@ Page({
       pref: Object.assign({ spicy: -1, light: false }, app.globalData.pref),
       dishLib: meta,
       dishLibSourceText: SOURCE_TEXT[meta.source] || '未知',
-      dishLibTimeText: meta.lastSyncAt ? timeText(meta.lastSyncAt) : '尚未同步'
+      dishLibTimeText: meta.lastSyncAt ? timeText(meta.lastSyncAt) : '尚未同步',
+      syncStatusText: sync.status,
+      syncTimeText: sync.at,
+      syncError: sync.error
+    });
+  },
+
+  /** 云端同步状态 → 展示文案 */
+  syncView() {
+    if (!userStore.enabled()) {
+      return { status: '未开启', error: '', at: '—' };
+    }
+    const m = app.syncMeta();
+    const at = m.lastSyncAt ? timeText(m.lastSyncAt) : '尚未同步';
+    if (m.lastError) return { status: m.lastError, error: m.lastError, at: at };
+    if (m.lastSyncAt) return { status: '已同步', error: '', at: at };
+    return { status: '尚未同步', error: '', at: at };
+  },
+
+  /** 手动同步一次 */
+  onSyncNow() {
+    if (this.data.syncBusy) return;
+    const that = this;
+    this.setData({ syncBusy: true });
+    wx.showLoading({ title: '同步中…', mask: true });
+    app.syncNow().then(function (r) {
+      wx.hideLoading();
+      that.setData({ syncBusy: false });
+      that.refresh();
+      wx.showToast({
+        title: r && r.ok ? '已同步到云端' : ((r && r.error) || '同步失败'),
+        icon: 'none'
+      });
     });
   },
 

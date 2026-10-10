@@ -5,14 +5,15 @@
     "pages/detail/detail",
     "pages/mine/mine",
     "pages/city/city",
-    "pages/takeout/takeout"
+    "pages/takeout/takeout",
+    "pages/share/share"
   ],
   "window": {
     "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#FFF7F1",
+    "navigationBarBackgroundColor": "#F5F6F7",
     "navigationBarTitleText": "今天吃什么",
     "navigationBarTextStyle": "black",
-    "backgroundColor": "#FFF7F1"
+    "backgroundColor": "#F5F6F7"
   },
   "permission": {
     "scope.userLocation": {

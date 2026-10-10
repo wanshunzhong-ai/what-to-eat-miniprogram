@@ -1,45 +1,51 @@
+/* pages/detail/detail.wxss — 菜品详情 */
+
+/* ---------- 头部：浅暖渐变，与结果页同一套语言 ---------- */
 .d-hero {
-  background: linear-gradient(135deg, #FFF1E6 0%, #FFE2D2 100%);
-  border-radius: 32rpx;
-  padding: 44rpx 36rpx;
-  text-align: center;
   margin-top: 16rpx;
+  padding: 40rpx 32rpx;
+  border-radius: var(--r-lg);
+  background: linear-gradient(160deg, #FFF7F2 0%, #FFE9DB 100%);
+  border: 1rpx solid var(--primary-line);
+  text-align: center;
 }
 .d-emoji {
-  width: 140rpx;
-  height: 140rpx;
-  line-height: 140rpx;
+  width: 132rpx;
+  height: 132rpx;
+  line-height: 132rpx;
   margin: 0 auto 20rpx;
-  border-radius: 40rpx;
+  border-radius: var(--r-xl);
   background: #fff;
-  font-size: 80rpx;
-  box-shadow: 0 8rpx 22rpx rgba(255, 107, 53, 0.18);
+  font-size: 72rpx;
+  box-shadow: var(--sh-1);
 }
 .d-name {
-  font-size: 46rpx;
+  font-size: 44rpx;
   font-weight: 700;
+  letter-spacing: -0.5rpx;
 }
 .d-tags {
   margin-top: 16rpx;
 }
 .d-meta {
   margin-top: 16rpx;
-  font-size: 25rpx;
-  color: var(--text-sub);
+  font-size: 24rpx;
+  color: var(--ink-3);
 }
 .d-meta .dot {
   margin: 0 12rpx;
+  color: var(--ink-4);
 }
 .d-desc {
   margin-top: 18rpx;
-  font-size: 27rpx;
-  color: #7A6E64;
+  font-size: 26rpx;
+  color: var(--ink-2);
   line-height: 1.6;
 }
 
-/* 食材 */
+/* ---------- 食材 ---------- */
 .ing-card {
-  padding: 10rpx 28rpx;
+  padding: 8rpx 28rpx;
 }
 .ing-item {
   display: flex;
@@ -52,26 +58,27 @@
   border-bottom: none;
 }
 .ing-name {
-  font-size: 29rpx;
-  color: var(--text);
+  font-size: 28rpx;
+  color: var(--ink);
 }
 .ing-amount {
-  font-size: 29rpx;
+  font-size: 28rpx;
   font-weight: 600;
-  color: var(--primary-dark);
+  color: var(--primary-ink);
 }
 .ing-amount.small {
-  font-size: 25rpx;
+  font-size: 24rpx;
   font-weight: 400;
-  color: var(--text-sub);
+  color: var(--ink-3);
 }
 
-/* 步骤 */
+/* ---------- 做法步骤 ---------- */
 .steps {
-  background: #fff;
-  border-radius: 26rpx;
-  padding: 12rpx 28rpx;
-  box-shadow: var(--shadow);
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 10rpx 28rpx;
+  box-shadow: var(--sh-1);
 }
 .step-item {
   display: flex;
@@ -89,8 +96,8 @@
   line-height: 44rpx;
   text-align: center;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
-  color: #fff;
+  background: var(--primary-soft);
+  color: var(--primary-ink);
   font-size: 24rpx;
   font-weight: 600;
   margin-right: 20rpx;
@@ -101,26 +108,26 @@
   line-height: 1.6;
 }
 
-/* 小贴士 */
+/* ---------- 小贴士 ---------- */
 .tip-card {
   margin-top: 32rpx;
-  background: #FFF3E9;
-  border-radius: 22rpx;
+  background: var(--primary-soft);
+  border-radius: var(--r-md);
   padding: 26rpx 28rpx;
 }
 .tip-title {
-  font-size: 27rpx;
-  font-weight: 700;
-  color: #A96A3D;
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--primary-ink);
 }
 .tip-text {
   margin-top: 10rpx;
-  font-size: 26rpx;
-  color: #A96A3D;
+  font-size: 25rpx;
+  color: #8A4A2A;
   line-height: 1.6;
 }
 
-/* 操作 */
+/* ---------- 操作 ---------- */
 .action-row {
   display: flex;
   margin-top: 44rpx;

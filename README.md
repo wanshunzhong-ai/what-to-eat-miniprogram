@@ -43,12 +43,64 @@
 - **按「人数 + 预算」排序**：一个人更适合单份快餐，人多更推火锅烤肉；预算档位（20 元内 / 20-50 / 50-100 / 100+）只改排序，不重新请求
 - **一键导航 / 打电话 / 复制地址**：导航打不开时自动退化为复制地址
 - **店铺收藏**：喜欢的店收藏起来，下次直接看
+- **配送参考（估算）**：每家店显示**人气参考 / 起送价 / 配送费 / 预计送达**，
+  超出常规配送半径的会标出来，单人凑不满起送价也会提醒
 - **兜底**：没配置地图 Key 或网络失败时，不会白屏——给出明确提示与当地人气美食指引
+
+> ⚠️ 配送那几项是**估算**，不是平台报价：地图接口（腾讯位置服务 / OpenStreetMap）**不返回**
+> 起送价、配送费、时效和评分，这些只有美团 / 饿了么的开放平台才有。做法是「先按品类给区间，
+> 再用店铺 id 的稳定哈希在区间内取值」——同一家店每次看到的数字都一样，不会乱跳。
+> 页面上已明确标注，想换成真实数据只需在 `utils/takeout.js` 的 `decorateShop` 里覆盖这几个字段。
 
 ### 通用
 
 - **本地人气**：推荐该城市/菜系值得一吃的特色小吃
 - **历史 & 收藏**：记录每次「自己做」和「点外卖」，带类型标签，可一键复现
+- **☁️ 云端同步**：收藏 / 店铺收藏 / 使用历史 / 口味偏好按**微信身份**存在云端，
+  **换手机、换设备登录同一个微信就自动恢复**；断网时照常可用，联网后自动补上
+- **📋 点菜清单导出 & 分享**：结果页可**复制清单文本**、**存成一张清单图**，
+  或**一键分享**——分享出去的是一条链接，朋友点开就能看到这一桌，不用截图
+
+## 🎨 界面与设计系统
+
+视觉方向是**清爽现代风**：中性灰阶打底，橙色只做「强调」，不做大面积铺色。全部样式收敛成
+`app.wxss` 里的一套 token，页面里不再出现魔法色值和重复定义。
+
+### 设计原则
+
+1. **橙色只用于强调**——选中态 chip、主按钮、一处分区标题色条。其余全是中性灰
+2. **白卡 + 1rpx 细描边 + 极浅阴影**，取代早期的重投影，观感更轻
+3. **字号 / 圆角 / 阴影 / 间距全部 token 化**，跨页面一致
+4. **可点即反馈**：所有可点元素都带 `hover-class` 按压态
+5. **首屏分区依次淡入**（`anim-up` + `d1~d6` 延迟档），外卖加载态用**骨架屏**而不是转圈
+
+### 色彩
+
+| 用途 | Token | 值 |
+|---|---|---|
+| 页面底 / 卡面 / 下沉面 | `--bg` / `--card` / `--sunken` | `#F5F6F7` / `#FFFFFF` / `#F2F4F5` |
+| 四级文字（主 / 次 / 辅 / 弱） | `--ink` `--ink-2` `--ink-3` `--ink-4` | `#17191C` → `#ADB5BD` |
+| 描边 | `--line` / `--line-strong` | `#EDEFF1` / `#E2E5E8` |
+| 品牌橙（填充）/ 浅底上的橙字 | `--primary` / `--primary-ink` | `#F26B3A` / `#C2410C` |
+| 语义色 | `--green` `--danger` `--gold` | `#12B76A` / `#E5484D` / `#F5A524` |
+
+> `--ink-3` 在白色上的对比度约 4.6:1、`--ink-4` 约 3.3:1（后者只用于 22rpx 以下的
+> 辅助说明），旧的 `#B6ACA3` 只有约 2.4:1，小字基本读不清——这次一并修掉了。
+
+### 全局组件类
+
+`app.wxss` 提供 `.card` / `.btn-primary` / `.btn-ghost` / `.chip` / `.pick-chip` / `.pick-on` /
+`.section-title` / `.empty` / `.sk`（骨架屏）/ `.hv` `.hv-soft` `.hv-card`（按压态）/
+`.anim-up` `.d1`~`.d6`。页面 WXSS 只写这一页特有的东西，不再重复定义 chip、flex-1 等。
+
+### 各页要点
+
+- **首页**：主按钮改为**吸底 dock**（滚到哪都能一键开始，带当前条件提示行 + 安全区适配）
+- **结果页 / 分享页 / 详情页**：头部由饱和橙色块统一改为**浅暖渐变卡**（文字回到 ink 色），
+  橙色只留在标签和色条上；结果页操作区改为「三个次级动作一行 + 分享整行做主视觉」
+- **外卖页**：加载态换成**骨架屏**；店铺卡的配送信息改成**四格等宽统计条**（带竖线分隔）
+- **我的页**：云端同步卡加了状态圆点（绿/红）；收藏 tab 改为分段控件
+- **城市页**：热门城市选中态由「整块渐变」改为「浅底 + 描边」，与全局选中语言统一
 
 ## 🚀 快速开始
 
@@ -105,6 +157,58 @@ utils/engine.js ──► 云函数 recommend（云端跑推荐逻辑）
   用 `node scripts/sync-dishlib.js` 校验并同步到 `cloudfunctions/dishes/dishlib.json`。
 - 「我的」页可查看当前菜品库的来源 / 版本 / 数量，并可手动「更新菜品库」。
 
+### ☁️ 用户数据云同步（换手机也不丢）
+
+收藏、店铺收藏、使用历史、口味偏好都按**微信身份**存在云端，换设备登录同一个微信即自动恢复。
+
+```
+小程序 utils/userStore.js ──► 云函数 userdata ──► PostgreSQL 表 eat_user_data
+        │  (纯传输层)                │  身份取自 cloud.getWXContext().OPENID
+        │                            │  （前端不传 openid，用户之间天然隔离）
+        └─ 断网 / 未配置 / 报错 ──► 静默退化为纯本地，功能不受影响
+```
+
+**离线优先**：本地写入永远立即生效、立刻落盘；同步在后台异步进行（改动后延迟 900ms 合并成一次请求）。
+
+**冲突怎么解**：按「集合级时间戳」取更新的一方（last-write-wins）——
+所以在手机上取消了收藏，另一台设备同步后也会跟着取消；某台旧设备送来的陈旧数据不会覆盖新数据。
+四个集合（`pref` / `favorites` / `shopFavorites` / `history`）各自独立比时间戳，互不干扰。
+
+| 位置 | 作用 |
+|---|---|
+| `utils/userStore.js` | 客户端同步层（纯传输 + 防抖排队，不碰本地缓存键） |
+| `app.js` | `exportState()` / `importState()` / `bumpSync()`：本地状态的读、写、打时间戳 |
+| `cloudfunctions/userdata/` | `pull` / `sync` / `clear` 三个动作，含合并逻辑 |
+| `cloudfunctions/userdata/pgrest.js` | CloudBase PostgreSQL 的最小 REST 客户端 |
+| `cloudbase/migrations/*.sql` | 建表迁移（`eat_user_data`，RLS 开启、无 policy，仅云函数可访问） |
+| 「我的」页 | 云同步状态卡片 + 「立即同步」按钮 |
+
+### 🎯 推荐云函数按 OPENID 做个性化
+
+`recommend` 云函数会按 OPENID 记住口味偏好（存在同一张 `eat_user_data` 表里）：
+
+- 客户端这次带了**有效偏好** → 用它，并在后台把口味记到云端；
+- 客户端这次**没带**（比如换了手机、本地还没恢复）→ 用云端记着的那个。
+
+返回值里有 `prefUsed`（实际用的口味）和 `prefSource`（`client` / `cloud` / `none`），便于排查。
+写入走**读-改-写且比时间戳**，只动 `pref` 两个键，不会碰到收藏和历史；同容器内另有 60 秒短缓存，连推几桌不重复查库。
+
+### 📋 点菜清单：复制 / 存图 / 分享
+
+结果页四个动作：
+
+| 动作 | 实现 |
+|---|---|
+| 📋 复制清单 | 按「凉菜 → 荤 → 素 → 汤 → 主食」分组排好，连同人数、配比、提示一起进剪贴板 |
+| 🖼️ 存成图片 | 用 `<canvas type="2d">` 画一张清单图（`utils/menuShare.js`），存进相册；没有相册权限会引导去设置 |
+| 📤 分享给同吃的朋友 | 分享的是**链接**，朋友点开直接看到这一桌，不用截图 |
+| 🔄 换一批 | 换新菜单的同时，分享封面图也跟着重画 |
+
+分享链接怎么带的菜单？**菜名直接编码进 `path`**（`/pages/share/share?m=...`），
+所以对方打开即看，**不需要登录、不依赖云端**。载荷只有约 100~200 字符，不会撞到 path 长度上限；
+真超了（> 700 字符）会自动退化成普通分享，不会给出一条打不开的链接。
+接收端是 `pages/share/share`，这一桌的用量和做法会在对方设备上按**他自己的人数**重新算。
+
 ### 运行环境兼容（`utils/wxapi.js`）
 
 不同运行环境实现的 `wx` 接口并不一致——真机、开发者工具、**预览沙箱**之间都有差异。
@@ -157,22 +261,32 @@ module.exports = {
   RECOMMEND_FN: 'recommend',                            // 推荐云函数名
   DISHES_FN: 'dishes',                                  // 菜品库云函数名（运行时下发菜品库）
   NEARBY_FN: 'nearby',                                  // 附近店铺云函数名
+  ENABLE_SYNC: true,                                    // 用户数据云同步开关（关掉则纯本地）
+  USERDATA_FN: 'userdata',                              // 用户数据云函数名（收藏/历史/偏好）
   NEARBY_RADIUS: 3000                                   // 周边搜索半径（米）
 };
 ```
 
 ### 部署云函数
 
-三个云函数**均已部署到环境 `zws-04161130-l`**，调用验证通过：
+四个云函数**均已部署到环境 `zws-04161130-l`**，调用验证通过：
 
 | 云函数 | 作用 | 备注 |
 |---|---|---|
 | `dishes` | 菜品库下发 + 热更新 | 已播种云存储 `dishlib/dishlib.json`（341 道，v2026.10.10.1） |
-| `recommend` | 推荐一桌菜 | 运行时从云存储取菜品库（返回 `source: "cloud"`） |
+| `recommend` | 推荐一桌菜 | 运行时从云存储取菜品库（返回 `source: "cloud"`）；按 OPENID 读口味做个性化 |
 | `nearby` | 附近美食店 | 双数据源：配了 `TENCENT_LBS_KEY` 走腾讯位置服务，否则走 OpenStreetMap（免密钥） |
+| `userdata` | 用户数据云同步 | 按 OPENID 读写 PG 表 `eat_user_data`，需环境变量 `CLOUDBASE_APIKEY` |
 
 `dishes` / `recommend` 都建议配置环境变量 `DISHLIB_FILE_ID`（菜品库在云存储里的 fileID），
 `recommend` 会优先直连云存储取库，少一跳、更快。
+
+> ⚠️ `userdata` 与 `recommend` 需要环境变量 **`CLOUDBASE_APIKEY`**（服务端 API Key，`service_role`）。
+> 这是**云函数访问 PostgreSQL 的唯一通道**：云函数内 `app.rdb()` 不可用（会报 `DATABASE_PGRST106`），
+> 可行路径只有 `https://<envId>.api.tcloudbasegateway.com/v1/rdb/rest/<table>`（Bearer API Key）。
+> Key 在 CloudBase 控制台「环境 → 登录授权 / API Key」创建，**只配在云函数环境变量里，绝不下发前端**。
+> 表结构迁移在 `cloudbase/migrations/`，用 `managePgDatabase(action=applyMigration)` 应用。
+
 
 若你更换了环境，或修改了 `cloudfunctions/` 下的数据/逻辑需要重新上传：
 
@@ -193,8 +307,12 @@ module.exports = {
 
 ### 环境说明
 
-当前环境 `zws-04161130-l-d6gd7g8f0c8c7fb17`（上海，体验版）为 **PostgreSQL 模式**。
-本项目**不依赖数据库**——推荐所需数据随云函数一起部署，因此 PG / NoSQL 模式都能跑，无需建表。
+当前环境 `zws-04161130-l-d6gd7g8f0c8c7fb17`（上海，体验版）为 **PostgreSQL 模式**（实例 `postgres-50cjoc1y`），
+**没有文档数据库**（`wx.cloud.database()` 在此环境不可用）。
+
+- 推荐 / 菜品库**不依赖数据库**：数据随云函数部署，跟着 `dishes` 走云存储。
+- **用户数据同步依赖 PG**：表 `eat_user_data` 由 `cloudbase/migrations/` 里的迁移创建，
+  只经云函数访问（RLS 开启、无 policy、无 GRANT），前端拿不到任何凭证。
 
 ## 🛵 附近店铺（双数据源：不配 Key 也能用）
 
@@ -261,28 +379,33 @@ pages/takeout ──► utils/engine.js ──► 云函数 nearby ──┬─�
 
 ```
 VX-2/
-├── app.js / app.json / app.wxss     全局逻辑（含云开发初始化 + 菜品库预热）、路由、主题样式
+├── app.js / app.json / app.wxss     全局逻辑（云开发初始化 + 菜品库预热 + 云端同步）、路由、设计系统 token + 全局组件类
 ├── config.js                        云开发配置（环境 ID / 开关 / 云函数名 / 搜索半径）
 ├── project.config.json              项目配置（AppID、cloudfunctionRoot、packOptions.ignore）
 ├── data/
 │   └── dishlib.json                 菜品库唯一数据源（341 道，已被 packOptions.ignore 排除，不进小程序包）
+├── cloudbase/
+│   └── migrations/                  PostgreSQL 迁移（eat_user_data 建表）
 ├── scripts/
 │   ├── sync-dishlib.js              校验 data/dishlib.json 并同步到 dishes 云函数
 │   └── gen-fallback.js              从完整库生成 utils/dishes.js 的精简内置兜底
 ├── pages/
 │   ├── index/     首页：自己做 / 点外卖 模式切换 + 定位 + 人数 + 餐次 + 偏好/预算
 │   ├── city/      城市选择：搜索 + 热门城市 + 自动定位 + 「离你最近」
-│   ├── result/    推荐结果：一桌菜 + 换一批 + 本地人气
-│   ├── takeout/   外卖结果：附近的店 + 品类/预算筛选 + 导航/电话 + 收藏
+│   ├── result/    推荐结果：一桌菜 + 换一批 + 复制清单 / 存图 / 分享 + 本地人气
+│   ├── share/     朋友分享来的点菜清单（内容编码在链接里，打开即看）
+│   ├── takeout/   外卖结果：附近的店 + 品类/预算筛选 + 配送参考 + 导航/电话 + 收藏
 │   ├── detail/    菜品详情：从菜品库取数 + 食材用量换算 + 做法 + 收藏
-│   └── mine/      我的：偏好设置 + 菜品库状态/更新 + 收藏（菜品/店铺）+ 历史
+│   └── mine/      我的：云端同步状态 + 偏好设置 + 菜品库状态/更新 + 收藏 + 历史
 ├── utils/
 │   ├── cities.js        城市坐标 + 省份 + 对应菜系（131 座，含直辖市多锚点、就近匹配）
 │   ├── dishes.js        内置兜底菜品库（47 道，覆盖全部分类；完整库在云端）
 │   ├── dishStore.js     菜品库运行时数据源：cloud → cache → builtin 三级降级
+│   ├── userStore.js     用户数据云同步：防抖推送 + 全量合并 + 状态快照
+│   ├── menuShare.js     点菜清单：文本 / 图片（canvas）/ 分享链接编解码 + 分组
 │   ├── foodData.js      各地人气美食
 │   ├── recommender.js   推荐算法引擎（菜品库由外部注入，不内嵌数据）
-│   ├── takeout.js       外卖品类/预算规则 + 店铺归一化与排序
+│   ├── takeout.js       外卖品类/预算规则 + 配送估算 + 店铺归一化与排序
 │   ├── wxapi.js         wx 接口安全层（缺失接口兜底 + 定位 Promise 封装）
 │   └── engine.js        数据统一入口：recommend（云端优先/本地兜底）+ loadDishlib + nearbyPlaces
 └── cloudfunctions/
@@ -292,6 +415,11 @@ VX-2/
     │   └── package.json
     ├── recommend/       推荐云函数（含同一套 recommender/cities/foodData，运行时取菜品库）
     │   ├── index.js
+    │   ├── userpref.js   按 OPENID 读/写口味偏好（读-改-写 + 时间戳保护 + 60s 缓存）
+    │   └── package.json
+    ├── userdata/        用户数据云同步（收藏 / 店铺收藏 / 历史 / 偏好）
+    │   ├── index.js
+    │   ├── pgrest.js     CloudBase PostgreSQL 最小 REST 客户端
     │   └── package.json
     └── nearby/          附近店铺云函数（腾讯位置服务 + OpenStreetMap 双源，多镜像并行）
         ├── index.js
@@ -320,10 +448,11 @@ VX-2/
 
 ## 🔭 下一步可以做什么
 
-- 把**收藏 / 历史**迁到云开发数据库，实现换手机也能同步
-- 云函数侧按 `OPENID` 记录口味偏好，做个性化推荐
-- 外卖侧接入**配送范围 / 起送价 / 评分**（需美团/饿了么等开放平台数据）
-- 增加「点菜清单」导出、一键分享给同吃的朋友
+- 配 `TENCENT_LBS_KEY`，让外卖门店更全、带上电话（见上文「申请并使用腾讯地图 Key」）
+- 把配送那几项从**估算**换成真值：需要接美团 / 饿了么开放平台，接口到位后
+  在 `utils/takeout.js` 的 `decorateShop` 里覆盖 `minOrder / deliveryFee / eta / rating` 即可，页面无需改动
+- 点菜清单的「买菜清单」：把一桌菜的食材按用量合并去重，导出成一张采购单
+- 多设备实时同步（当前是启动时 + 改动后合并，不是实时推送）
 
 ---
 

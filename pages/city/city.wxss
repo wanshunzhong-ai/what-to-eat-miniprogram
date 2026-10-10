@@ -1,15 +1,19 @@
+/* pages/city/city.wxss — 选择城市 */
+
+/* ---------- 搜索 ---------- */
 .search-bar {
   display: flex;
   align-items: center;
   height: 88rpx;
-  background: #fff;
-  border-radius: 44rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-pill);
   padding: 0 28rpx;
-  box-shadow: var(--shadow);
+  box-shadow: var(--sh-1);
   margin-top: 8rpx;
 }
 .search-icon {
-  font-size: 30rpx;
+  font-size: 28rpx;
   margin-right: 14rpx;
 }
 .search-input {
@@ -17,29 +21,32 @@
   font-size: 28rpx;
 }
 .ph {
-  color: var(--text-light);
+  color: var(--ink-4);
 }
 
+/* ---------- 定位按钮（次级动作，白底描边） ---------- */
 .locate-btn {
   display: flex;
   align-items: center;
   justify-content: center;
   height: 88rpx;
-  margin-top: 24rpx;
-  border-radius: 44rpx;
-  background: var(--primary-soft);
-  color: var(--primary-dark);
-  font-size: 29rpx;
-  font-weight: 600;
+  margin-top: 20rpx;
+  border-radius: var(--r-pill);
+  background: var(--card);
+  border: 1rpx solid var(--line-strong);
+  color: var(--ink-2);
+  font-size: 28rpx;
+  font-weight: 500;
+  transition: background 0.15s;
 }
 .locate-emoji {
   margin-right: 12rpx;
 }
 
-/* 离你最近 */
+/* ---------- 离你最近 ---------- */
 .near-hint {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
   margin: -8rpx 0 16rpx;
   line-height: 1.5;
 }
@@ -52,14 +59,14 @@
 }
 .near-item {
   display: inline-block;
-  min-width: 150rpx;
-  margin-right: 16rpx;
+  min-width: 152rpx;
+  margin-right: 14rpx;
   padding: 20rpx 22rpx;
-  background: #fff;
-  border-radius: 20rpx;
+  background: var(--card);
+  border: 2rpx solid var(--line);
+  border-radius: var(--r-md);
   text-align: center;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.06);
-  border: 2rpx solid transparent;
+  transition: background 0.15s, border-color 0.15s;
 }
 .near-item.near-on {
   border-color: var(--primary);
@@ -70,17 +77,17 @@
   font-weight: 600;
 }
 .ni-dist {
-  font-size: 22rpx;
-  color: var(--primary-dark);
+  font-size: 21rpx;
+  color: var(--primary-ink);
   margin-top: 4rpx;
 }
 .ni-cuisine {
-  font-size: 21rpx;
-  color: var(--text-light);
+  font-size: 20rpx;
+  color: var(--ink-4);
   margin-top: 2rpx;
 }
 
-/* 热门城市 */
+/* ---------- 热门城市 ---------- */
 .hot-grid {
   display: flex;
   flex-wrap: wrap;
@@ -89,60 +96,66 @@
 .hot-item {
   width: calc(25% - 16rpx);
   margin: 8rpx;
-  background: #fff;
-  border-radius: 20rpx;
-  padding: 22rpx 12rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  padding: 22rpx 8rpx;
   text-align: center;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.06);
+  box-shadow: var(--sh-1);
+  transition: background 0.15s, border-color 0.15s;
 }
+/* 选中态从「整块渐变」改为浅底 + 描边，和全局选中语言保持一致 */
 .hot-item.hot-on {
-  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
-}
-.hot-item.hot-on .hot-name,
-.hot-item.hot-on .hot-cuisine {
-  color: #fff;
+  background: var(--primary-soft);
+  border-color: var(--primary-line);
 }
 .hot-name {
-  font-size: 28rpx;
+  font-size: 27rpx;
   font-weight: 600;
 }
+.hot-item.hot-on .hot-name {
+  color: var(--primary-ink);
+}
 .hot-cuisine {
-  font-size: 21rpx;
-  color: var(--text-light);
+  font-size: 20rpx;
+  color: var(--ink-4);
   margin-top: 4rpx;
 }
 
-/* 城市列表 */
+/* ---------- 城市列表 ---------- */
 .city-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 26rpx 20rpx;
-  background: #fff;
-  border-radius: 20rpx;
-  margin-bottom: 14rpx;
-  box-shadow: 0 4rpx 14rpx rgba(255, 107, 53, 0.05);
+  padding: 26rpx 24rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  margin-bottom: 12rpx;
+  box-shadow: var(--sh-1);
+  transition: background 0.15s;
 }
 .ci-left {
   display: flex;
   align-items: baseline;
+  min-width: 0;
 }
 .ci-name {
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 600;
-  margin-right: 16rpx;
+  margin-right: 14rpx;
 }
 .ci-prov {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
 }
 .ci-cuisine {
-  font-size: 25rpx;
-  color: var(--primary-dark);
+  font-size: 24rpx;
+  color: var(--ink-3);
 }
 .city-foot {
   text-align: center;
-  color: var(--text-light);
-  font-size: 24rpx;
+  color: var(--ink-4);
+  font-size: 23rpx;
   margin: 30rpx 0 10rpx;
 }

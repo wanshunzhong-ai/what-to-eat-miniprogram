@@ -14,6 +14,7 @@
         wx:key="key"
         class="pick-chip sm {{catKey === item.key ? 'pick-on' : ''}}"
         data-value="{{item.key}}"
+        hover-class="hv"
         bindtap="onPickCat"
       >{{item.emoji}}{{item.label}}</view>
     </view>
@@ -28,15 +29,23 @@
         wx:key="key"
         class="pick-chip xs {{budgetKey === item.key ? 'pick-on' : ''}}"
         data-value="{{item.key}}"
+        hover-class="hv"
         bindtap="onPickBudget"
       >{{item.label}}</view>
     </view>
   </view>
 
-  <!-- 加载中 -->
-  <view wx:if="{{state === 'loading' && !list.length}}" class="empty">
-    <text class="empty-emoji">🛵</text>
-    <view class="empty-text">正在找附近的店…</view>
+  <!-- 加载中：骨架屏，比一个转圈更能说明"马上就有内容" -->
+  <view wx:if="{{state === 'loading' && !list.length}}" class="sk-wrap">
+    <view class="sk-card" wx:for="{{[1, 2, 3]}}" wx:key="*this">
+      <view class="sk sk-avatar"></view>
+      <view class="sk-body">
+        <view class="sk sk-line" style="width: 46%"></view>
+        <view class="sk sk-line" style="width: 70%"></view>
+        <view class="sk sk-line" style="width: 90%"></view>
+      </view>
+    </view>
+    <view class="sk-tip">正在找附近的店…</view>
   </view>
 
   <!-- 拿不到线上门店：说清是什么问题 + 人气美食兜底，不留死路 -->
@@ -57,6 +66,7 @@
           wx:for="{{fallbackFoods}}"
           wx:key="name"
           data-name="{{item.name}}"
+          hover-class="hv-soft"
           bindtap="onPickFallback"
         >
           <text class="food-emoji">{{item.emoji}}</text>
@@ -82,6 +92,7 @@
           wx:for="{{fallbackFoods}}"
           wx:key="name"
           data-name="{{item.name}}"
+          hover-class="hv-soft"
           bindtap="onPickFallback"
         >
           <text class="food-emoji">{{item.emoji}}</text>
@@ -100,6 +111,9 @@
     </view>
     <view wx:if="{{dataSourceText}}" class="src-note">{{dataSourceText}}</view>
     <view wx:if="{{note}}" class="src-note">{{note}}</view>
+    <view class="est-note">
+      ℹ️ 起送价 / 配送费 / 送达时间按「品类 + 距离」估算，人气参考也不是平台评分；下单前请以外卖 App 里的实际信息为准。
+    </view>
 
     <view class="shop-card" wx:for="{{list}}" wx:key="id">
       <view class="shop-top">
@@ -111,20 +125,46 @@
             <text wx:if="{{item.distanceText}}" class="shop-dist">{{item.distanceText}}</text>
             <text wx:if="{{item.perHeadText}}" class="shop-price">参考人均 {{item.perHeadText}}</text>
           </view>
+
+          <!-- 配送信息（近似版，已在顶部注明） -->
+          <view class="deliver-row">
+            <view class="dl">
+              <text class="dl-k">人气参考</text>
+              <text class="dl-v rate">{{item.ratingText}}</text>
+            </view>
+            <view class="dl">
+              <text class="dl-k">起送</text>
+              <text class="dl-v">{{item.minOrderText}}</text>
+            </view>
+            <view class="dl">
+              <text class="dl-k">配送费</text>
+              <text class="dl-v">{{item.deliveryFeeText}}</text>
+            </view>
+            <view class="dl">
+              <text class="dl-k">送达</text>
+              <text class="dl-v">{{item.etaText}}</text>
+            </view>
+          </view>
+
+          <view wx:if="{{!item.inRange}}" class="range-warn">
+            ⚠️ 距离超过常送的 {{item.rangeText}}，可能不在配送范围内
+          </view>
           <view wx:if="{{item.recommendReason}}" class="shop-why">💡 {{item.recommendReason}}</view>
+          <view wx:if="{{item.orderHint}}" class="order-hint">🧾 {{item.orderHint}}</view>
           <view wx:if="{{item.address}}" class="shop-addr">{{item.address}}</view>
         </view>
         <view
           class="shop-fav {{item.faved ? 'faved' : ''}}"
           data-id="{{item.id}}"
+          hover-class="hv"
           catchtap="onFav"
         >{{item.faved ? '★' : '☆'}}</view>
       </view>
 
       <view class="shop-actions">
-        <view class="act" data-index="{{index}}" bindtap="onNavigate">🧭 导航</view>
-        <view wx:if="{{item.tel}}" class="act" data-tel="{{item.tel}}" bindtap="onCall">📞 打电话</view>
-        <view class="act" data-index="{{index}}" bindtap="onCopy">📋 复制地址</view>
+        <view class="act" data-index="{{index}}" hover-class="hv-soft" bindtap="onNavigate">🧭 导航</view>
+        <view wx:if="{{item.tel}}" class="act" data-tel="{{item.tel}}" hover-class="hv-soft" bindtap="onCall">📞 打电话</view>
+        <view class="act" data-index="{{index}}" hover-class="hv-soft" bindtap="onCopy">📋 复制地址</view>
       </view>
     </view>
 
@@ -135,7 +175,7 @@
   </block>
 
   <view class="footer-links">
-    <view class="footer-link" bindtap="goHome">‹ 返回改改条件</view>
+    <view class="footer-link" hover-class="hv" bindtap="goHome">‹ 返回改改条件</view>
   </view>
   <view class="safe-bottom"></view>
 </view>

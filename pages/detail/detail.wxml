@@ -1,10 +1,10 @@
 <view class="page-wrap" wx:if="{{dish}}">
   <!-- 头部 -->
-  <view class="d-hero">
+  <view class="d-hero anim-up">
     <view class="d-emoji">{{dish.emoji}}</view>
     <view class="d-name">{{dish.name}}</view>
     <view class="d-tags">
-      <text class="chip">{{dish.cuisine}}</text>
+      <text class="chip chip-brand">{{dish.cuisine}}</text>
       <text class="chip chip-plain">{{dish.category}}</text>
       <text class="chip {{dish.spicy > 0 ? 'chip-spicy' : 'chip-plain'}}">{{spicyText}}</text>
     </view>
@@ -54,7 +54,7 @@
   <view class="safe-bottom"></view>
 </view>
 
-<view wx:else class="empty">
+<view wx:else class="empty anim-in">
   <text class="empty-emoji">🍽️</text>
   <text>没有找到这道菜</text>
 </view>

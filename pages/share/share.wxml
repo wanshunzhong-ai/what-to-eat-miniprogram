@@ -1,0 +1,48 @@
+<block wx:if="{{menu}}">
+  <view class="page-wrap">
+    <!-- 头部：与「推荐结果」页同一套浅暖渐变，保持视觉连续 -->
+    <view class="share-hero anim-up">
+      <view class="sh-label">{{fromFriend ? '朋友分享给你的菜单' : '点菜清单'}}</view>
+      <view class="sh-title">{{menu.people}} 人 · {{menu.mealLabel}}</view>
+      <view class="sh-tags">
+        <text wx:if="{{menu.city.name}}" class="chip">{{menu.city.name}}</text>
+        <text class="chip">共 {{menu.count}} 道</text>
+      </view>
+    </view>
+
+    <!-- 分组菜单 -->
+    <view class="group anim-up d1" wx:for="{{groups}}" wx:key="category" wx:for-item="g">
+      <view class="group-title">
+        <text class="gt-dot">◆</text>
+        <text>{{g.category}}</text>
+        <text class="gt-count">{{g.list.length}} 道</text>
+      </view>
+      <view class="group-item" wx:for="{{g.list}}" wx:key="id" hover-class="hv-card">
+        <text class="gi-emoji">{{item.emoji}}</text>
+        <text class="gi-name">{{item.name}}</text>
+      </view>
+    </view>
+
+    <!-- 操作 -->
+    <view class="action-row">
+      <button class="btn-ghost flex-1" bindtap="onCopy">📋 复制菜名</button>
+      <button class="btn-ghost flex-1" open-type="share">📤 转给朋友</button>
+    </view>
+
+    <view class="go-own" hover-class="hv" bindtap="onGoHome">
+      🍳 我也想这么吃 · 去配一桌
+    </view>
+
+    <view class="tip-note">
+      用量和做法按你这边的人数重新算过了，点菜名看详情即可。
+    </view>
+    <view class="safe-bottom"></view>
+  </view>
+</block>
+
+<view wx:else class="empty anim-in">
+  <text class="empty-emoji">🍽️</text>
+  <text>这份菜单没能打开</text>
+  <view class="empty-sub">链接可能被截断或已过期，让朋友重新分享一次试试</view>
+  <view class="go-home" hover-class="hv" bindtap="onGoHome">回到首页</view>
+</view>

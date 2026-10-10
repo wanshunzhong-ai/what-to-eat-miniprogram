@@ -1,7 +1,27 @@
 <view class="page-wrap">
-  <view class="hero">
+  <view class="hero anim-up">
     <view class="hero-title">我的</view>
     <view class="hero-sub">收藏 · 历史 · 偏好</view>
+  </view>
+
+  <!-- 云端同步：收藏 / 历史 / 偏好跟着微信走 -->
+  <view class="section-title">云端同步</view>
+  <view class="card sync-card">
+    <view class="lib-row">
+      <text class="lib-label">同步状态</text>
+      <view class="sync-state">
+        <view class="state-dot {{syncError ? 'dot-bad' : 'dot-ok'}}"></view>
+        <text class="lib-value {{syncError ? 'sync-bad' : ''}}">{{syncStatusText}}</text>
+      </view>
+    </view>
+    <view class="lib-row">
+      <text class="lib-label">最近同步</text>
+      <text class="lib-value">{{syncTimeText}}</text>
+    </view>
+    <view class="lib-tip">收藏、店铺收藏、使用历史和口味偏好都存在云端，按微信身份归属。换手机、换设备登录同一个微信就能自动恢复；断网时照常可用，联网后自动补上。</view>
+    <view class="lib-btn {{syncBusy ? 'lib-btn-busy' : ''}}" hover-class="hv-soft" bindtap="onSyncNow">
+      {{syncBusy ? '同步中…' : '立即同步'}}
+    </view>
   </view>
 
   <!-- 偏好 -->
@@ -15,13 +35,14 @@
           wx:key="value"
           class="pick-chip sm {{pref.spicy === item.value ? 'pick-on' : ''}}"
           data-value="{{item.value}}"
+          hover-class="hv"
           bindtap="onPickSpicy"
         >{{item.label}}</view>
       </view>
     </view>
-    <view class="pref-row">
+    <view class="pref-row pref-row-last">
       <view class="pref-label">想清淡</view>
-      <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
+      <switch class="pref-switch" checked="{{pref.light}}" color="#F26B3A" bindchange="onToggleLight" />
     </view>
   </view>
 
@@ -45,7 +66,7 @@
       <text class="lib-value">{{dishLibTimeText}}</text>
     </view>
     <view class="lib-tip">菜品库放在云端，加菜 / 改菜无需重新发版；连不上云端时自动用本地缓存或内置兜底。</view>
-    <view class="lib-btn {{dishLibSyncing ? 'lib-btn-busy' : ''}}" bindtap="onRefreshDishlib">
+    <view class="lib-btn {{dishLibSyncing ? 'lib-btn-busy' : ''}}" hover-class="hv-soft" bindtap="onRefreshDishlib">
       {{dishLibSyncing ? '同步中…' : '更新菜品库'}}
     </view>
   </view>
@@ -55,10 +76,10 @@
     <view class="section-title">我的收藏</view>
   </view>
   <view class="tab-bar">
-    <view class="tab-item {{tab === 'dish' ? 'tab-on' : ''}}" data-value="dish" bindtap="onSwitchTab">
+    <view class="tab-item {{tab === 'dish' ? 'tab-on' : ''}}" data-value="dish" hover-class="hv" bindtap="onSwitchTab">
       🍽️ 菜品 ({{favList.length}})
     </view>
-    <view class="tab-item {{tab === 'shop' ? 'tab-on' : ''}}" data-value="shop" bindtap="onSwitchTab">
+    <view class="tab-item {{tab === 'shop' ? 'tab-on' : ''}}" data-value="shop" hover-class="hv" bindtap="onSwitchTab">
       🏪 店铺 ({{shopList.length}})
     </view>
   </view>
@@ -67,7 +88,7 @@
   <block wx:if="{{tab === 'dish'}}">
     <view wx:if="{{favList.length === 0}}" class="mini-empty">还没有收藏菜品，进菜品详情页点个 ⭐ 吧</view>
     <view class="fav-list" wx:else>
-      <view class="fav-item" wx:for="{{favList}}" wx:key="id" data-id="{{item.id}}" bindtap="onFavTap">
+      <view class="fav-item" wx:for="{{favList}}" wx:key="id" data-id="{{item.id}}" hover-class="hv-card" bindtap="onFavTap">
         <text class="fav-emoji">{{item.emoji}}</text>
         <view class="fav-body">
           <view class="fav-name">{{item.name}}</view>
@@ -91,12 +112,18 @@
             <text wx:if="{{item.distanceText}}"> · {{item.distanceText}}</text>
             <text wx:if="{{item.perHeadText}}"> · 参考人均 {{item.perHeadText}}</text>
           </view>
+          <view wx:if="{{item.ratingText}}" class="fav-deli">
+            人气参考 {{item.ratingText}}
+            <text wx:if="{{item.minOrderText}}"> · 起送 {{item.minOrderText}}</text>
+            <text wx:if="{{item.etaText}}"> · 送达 {{item.etaText}}</text>
+            <text wx:if="{{item.inRange === false}}" class="fav-out"> · 可能超范围</text>
+          </view>
           <view wx:if="{{item.address}}" class="fav-addr">{{item.address}}</view>
           <view class="shop-acts">
-            <text class="shop-act" data-index="{{index}}" catchtap="onShopNav">🧭 导航</text>
-            <text wx:if="{{item.tel}}" class="shop-act" data-tel="{{item.tel}}" catchtap="onShopCall">📞 打电话</text>
-            <text class="shop-act" data-index="{{index}}" catchtap="onShopCopy">📋 复制地址</text>
-            <text class="shop-act act-weak" data-index="{{index}}" catchtap="onUnfavShop">☆ 取消收藏</text>
+            <view class="shop-act" data-index="{{index}}" hover-class="hv" catchtap="onShopNav">🧭 导航</view>
+            <view wx:if="{{item.tel}}" class="shop-act" data-tel="{{item.tel}}" hover-class="hv" catchtap="onShopCall">📞 打电话</view>
+            <view class="shop-act" data-index="{{index}}" hover-class="hv" catchtap="onShopCopy">📋 复制地址</view>
+            <view class="shop-act act-weak" data-index="{{index}}" hover-class="hv" catchtap="onUnfavShop">☆ 取消收藏</view>
           </view>
         </view>
       </view>
@@ -106,7 +133,7 @@
   <!-- 历史 -->
   <view class="section-head">
     <view class="section-title">使用历史 ({{historyList.length}})</view>
-    <text wx:if="{{historyList.length}}" class="clear-btn" bindtap="onClearHistory">清空</text>
+    <view wx:if="{{historyList.length}}" class="clear-btn" hover-class="hv" bindtap="onClearHistory">清空</view>
   </view>
   <view wx:if="{{historyList.length === 0}}" class="mini-empty">还没有记录，回首页试试吧</view>
   <view class="his-list" wx:else>
@@ -115,6 +142,7 @@
       wx:for="{{historyList}}"
       wx:key="id"
       data-index="{{index}}"
+      hover-class="hv-card"
       bindtap="onHistoryTap"
     >
       <view class="his-top">

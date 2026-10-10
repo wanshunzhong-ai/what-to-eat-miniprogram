@@ -1,38 +1,49 @@
-/* 头部 */
+/* pages/result/result.wxss — 推荐结果 */
+
+/* ---------- 头部：浅暖渐变卡，橙色退为点缀 ---------- */
 .result-hero {
-  background: linear-gradient(135deg, #FF8A4C 0%, #FF5A1F 100%);
-  border-radius: 0 0 40rpx 40rpx;
-  margin: 0 -32rpx 32rpx;
-  padding: 40rpx 44rpx 44rpx;
-  color: #fff;
-  box-shadow: 0 12rpx 30rpx rgba(255, 90, 31, 0.28);
+  margin: 8rpx 0 28rpx;
+  padding: 36rpx 36rpx 40rpx;
+  border-radius: var(--r-lg);
+  background: linear-gradient(160deg, #FFF7F2 0%, #FFE9DB 100%);
+  border: 1rpx solid var(--primary-line);
 }
 .rh-label {
-  font-size: 26rpx;
-  opacity: 0.9;
+  font-size: 23rpx;
+  font-weight: 600;
+  color: var(--primary-ink);
+  letter-spacing: 1rpx;
 }
 .rh-title {
+  margin: 10rpx 0 22rpx;
   font-size: 52rpx;
   font-weight: 700;
-  margin: 8rpx 0 20rpx;
+  letter-spacing: -1rpx;
+  line-height: 1.2;
+}
+.rh-tags {
+  display: flex;
+  flex-wrap: wrap;
 }
 .rh-tags .chip {
-  background: rgba(255, 255, 255, 0.22);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--ink-2);
+  border: 1rpx solid #F6DFD1;
 }
 .rh-summary {
-  margin-top: 8rpx;
-  font-size: 25rpx;
-  opacity: 0.92;
+  margin-top: 14rpx;
+  font-size: 24rpx;
+  color: var(--ink-3);
 }
 
-/* 这一桌的配比 */
+/* ---------- 这一桌的配比 ---------- */
 .plan-card {
-  background: #fff;
-  border-radius: 24rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
   padding: 22rpx 26rpx;
   margin-bottom: 24rpx;
-  box-shadow: 0 6rpx 20rpx rgba(255, 107, 53, 0.08);
+  box-shadow: var(--sh-1);
 }
 .plan-row {
   display: flex;
@@ -40,48 +51,47 @@
 }
 .plan-title {
   flex: none;
-  font-size: 26rpx;
-  font-weight: 700;
-  color: var(--primary-dark);
+  font-size: 25rpx;
+  font-weight: 600;
+  color: var(--primary-ink);
   margin-right: 16rpx;
 }
 .plan-text {
   flex: 1;
-  font-size: 25rpx;
-  color: var(--text-sub);
-  line-height: 1.5;
+  font-size: 24rpx;
+  color: var(--ink-3);
+  line-height: 1.55;
 }
 .plan-tip {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
   margin-top: 10rpx;
-  line-height: 1.5;
+  line-height: 1.55;
 }
 
-/* 菜品卡 */
+/* ---------- 菜品卡 ---------- */
 .dish-card {
   display: flex;
   align-items: center;
-  background: #fff;
-  border-radius: 26rpx;
-  padding: 26rpx 24rpx;
-  margin-bottom: 20rpx;
-  box-shadow: 0 6rpx 20rpx rgba(255, 107, 53, 0.08);
-}
-.dish-card:active {
-  background: #FFFBF8;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-lg);
+  padding: 24rpx;
+  margin-bottom: 16rpx;
+  box-shadow: var(--sh-1);
+  transition: background 0.15s;
 }
 .dish-emoji {
-  width: 96rpx;
-  height: 96rpx;
+  width: 92rpx;
+  height: 92rpx;
   flex: none;
-  border-radius: 24rpx;
+  border-radius: var(--r-md);
   background: var(--primary-soft);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 52rpx;
-  margin-right: 24rpx;
+  font-size: 48rpx;
+  margin-right: 22rpx;
 }
 .dish-body {
   flex: 1;
@@ -92,20 +102,21 @@
   align-items: center;
 }
 .dish-name {
-  font-size: 34rpx;
-  font-weight: 700;
+  font-size: 32rpx;
+  font-weight: 600;
 }
 .dish-cat {
-  margin-left: 14rpx;
+  flex: none;
+  margin-left: 12rpx;
   font-size: 21rpx;
-  color: var(--primary-dark);
+  color: var(--primary-ink);
   background: var(--primary-soft);
-  border-radius: 8rpx;
+  border-radius: var(--r-sm);
   padding: 2rpx 12rpx;
 }
 .dish-desc {
-  font-size: 25rpx;
-  color: var(--text-sub);
+  font-size: 24rpx;
+  color: var(--ink-3);
   margin: 8rpx 0;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -116,66 +127,111 @@
   flex-wrap: wrap;
 }
 .meta-item {
-  font-size: 23rpx;
-  color: var(--text-light);
-  margin-right: 22rpx;
+  font-size: 22rpx;
+  color: var(--ink-4);
+  margin-right: 20rpx;
 }
 .meta-item.spicy {
-  color: #E53935;
+  color: var(--danger);
 }
 .dish-ings {
-  font-size: 23rpx;
-  color: var(--text-light);
+  font-size: 22rpx;
+  color: var(--ink-4);
   margin-top: 8rpx;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .dish-arrow {
-  font-size: 40rpx;
-  color: var(--text-light);
-  margin-left: 12rpx;
+  font-size: 36rpx;
+  color: var(--ink-4);
+  margin-left: 10rpx;
 }
 
-/* 操作 */
-.action-row {
+/* ---------- 操作区 ---------- */
+.action-grid {
   display: flex;
-  margin-top: 12rpx;
+  margin-top: 28rpx;
 }
-.action-row .btn-ghost {
-  margin: 0 10rpx;
+.act-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 132rpx;
+  margin-right: 16rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
+  box-shadow: var(--sh-1);
+}
+.act-btn:last-child {
+  margin-right: 0;
+}
+.act-ico {
+  font-size: 34rpx;
+  line-height: 1;
+}
+.act-txt {
+  margin-top: 12rpx;
+  font-size: 23rpx;
+  color: var(--ink-2);
+}
+.share-btn {
+  margin-top: 20rpx;
+}
+.share-hint {
+  margin-top: 16rpx;
+  color: var(--ink-4);
+  font-size: 22rpx;
+  line-height: 1.6;
+  text-align: center;
 }
 
-/* 本地人气 */
+/* ---------- 生成清单图用的隐藏画布 ---------- */
+.menu-canvas {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 620px;
+  height: 1100px;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ---------- 本地人气 ---------- */
 .local-list {
   display: flex;
   flex-wrap: wrap;
-  margin: 0 -10rpx;
+  margin: 0 -8rpx;
 }
 .local-item {
-  width: calc(50% - 20rpx);
-  margin: 10rpx;
-  background: #fff;
-  border-radius: 22rpx;
+  width: calc(50% - 16rpx);
+  margin: 8rpx;
+  background: var(--card);
+  border: 1rpx solid var(--line);
+  border-radius: var(--r-md);
   padding: 22rpx;
   display: flex;
   align-items: center;
-  box-shadow: 0 4rpx 16rpx rgba(255, 107, 53, 0.06);
+  box-shadow: var(--sh-1);
 }
 .local-emoji {
-  font-size: 40rpx;
-  margin-right: 16rpx;
+  font-size: 38rpx;
+  margin-right: 14rpx;
 }
 .local-body {
   min-width: 0;
 }
 .local-name {
-  font-size: 28rpx;
+  font-size: 27rpx;
   font-weight: 600;
 }
 .local-desc {
-  font-size: 22rpx;
-  color: var(--text-light);
+  font-size: 21rpx;
+  color: var(--ink-4);
   margin-top: 4rpx;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -186,27 +242,29 @@
 
 .nearby-note {
   margin-top: 28rpx;
-  background: #FFF3E9;
-  border-radius: 20rpx;
+  background: var(--sunken);
+  border-radius: var(--r-md);
   padding: 22rpx 26rpx;
-  font-size: 24rpx;
-  color: #A96A3D;
+  font-size: 23rpx;
+  color: var(--ink-3);
   line-height: 1.6;
 }
 
 .back-home {
   text-align: center;
-  color: var(--text-sub);
-  font-size: 27rpx;
-  margin-top: 40rpx;
+  color: var(--ink-3);
+  font-size: 26rpx;
+  margin-top: 44rpx;
+  padding: 16rpx;
 }
 
+/* ---------- 空态 ---------- */
 .go-home {
-  margin-top: 26rpx;
   display: inline-block;
-  padding: 16rpx 48rpx;
+  margin-top: 26rpx;
+  padding: 18rpx 52rpx;
   background: var(--primary);
   color: #fff;
-  border-radius: 40rpx;
+  border-radius: var(--r-pill);
   font-size: 28rpx;
 }
