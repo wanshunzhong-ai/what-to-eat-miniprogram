@@ -13,13 +13,6 @@ const SPICY_OPTIONS = [
   { value: 3, label: '重辣' }
 ];
 
-// 做菜时间是「软偏好」：只是优先推荐快手的，不会把慢菜直接排除掉
-const TIME_OPTIONS = [
-  { value: 0, label: '不限' },
-  { value: 30, label: '尽量30分钟内' },
-  { value: 60, label: '尽量1小时内' }
-];
-
 /** 把定位精度转成好读的文案 */
 function formatAccuracy(acc) {
   if (typeof acc !== 'number' || acc <= 0) return '';
@@ -69,8 +62,7 @@ Page({
     menuText: '',
     menuTip: '',
     spicyOptions: SPICY_OPTIONS,
-    timeOptions: TIME_OPTIONS,
-    pref: { spicy: -1, light: false, maxTime: 0 },
+    pref: { spicy: -1, light: false },
     budget: 'any',
     budgetOptions: takeoutData.BUDGETS,
     startHint: ''
@@ -83,7 +75,7 @@ Page({
     this.setData({
       meal: meal,
       mealLabel: recommender.MEAL_LABEL[meal] || '一餐',
-      pref: Object.assign({ spicy: -1, light: false, maxTime: 0 }, app.globalData.pref || {}),
+      pref: Object.assign({ spicy: -1, light: false }, app.globalData.pref || {}),
       people: people
     });
     this.refreshMenu();
@@ -95,7 +87,7 @@ Page({
     this.setData({ city: city || null });
     // 同步「我的」页里可能修改过的偏好
     if (app.globalData.pref) {
-      this.setData({ pref: Object.assign({ spicy: -1, light: false, maxTime: 0 }, app.globalData.pref) });
+      this.setData({ pref: Object.assign({ spicy: -1, light: false }, app.globalData.pref) });
     }
     if (!city) {
       this.autoLocate();
@@ -309,12 +301,6 @@ Page({
     const value = e.detail.value;
     app.setPref({ light: value });
     this.setData({ 'pref.light': value });
-  },
-
-  onPickTime(e) {
-    const value = Number(e.currentTarget.dataset.value);
-    app.setPref({ maxTime: value });
-    this.setData({ 'pref.maxTime': value });
   },
 
   onPickMode(e) {

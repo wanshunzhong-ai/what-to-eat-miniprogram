@@ -1,0 +1,9 @@
+{
+  "name": "dishes",
+  "version": "1.0.0",
+  "description": "今天吃什么 - 菜品库云函数：从云存储读取并下发菜品库，支持热更新（publish/seed）",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

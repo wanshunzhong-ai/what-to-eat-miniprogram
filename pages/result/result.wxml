@@ -8,7 +8,7 @@
         <text class="chip">{{result.city.name}}</text>
         <text class="chip" wx:for="{{result.cuisines}}" wx:key="*this">{{item}}</text>
       </view>
-      <view class="rh-summary">共 {{result.count}} 道 · 最长约 {{result.totalTime}} 分钟</view>
+      <view class="rh-summary">共 {{result.count}} 道 · 其中最费时的一道约 {{result.totalTime}} 分钟</view>
     </view>
 
     <!-- 这一桌的配比建议 -->

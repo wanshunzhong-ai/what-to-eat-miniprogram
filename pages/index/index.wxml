@@ -113,19 +113,7 @@
         <view class="pref-label">想清淡</view>
         <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
       </view>
-      <view class="pref-row">
-        <view class="pref-label">做菜时间</view>
-        <view class="chip-row wrap flex-1">
-          <view
-            wx:for="{{timeOptions}}"
-            wx:key="value"
-            class="pick-chip sm {{pref.maxTime === item.value ? 'pick-on' : ''}}"
-            data-value="{{item.value}}"
-            bindtap="onPickTime"
-          >{{item.label}}</view>
-        </view>
-      </view>
-      <view class="pref-note">做菜时间只是偏好：优先推荐快手菜，凑不齐时不会把慢菜一刀切掉</view>
+      <view class="pref-note">推荐按「人数 + 口味」来配：人数决定一桌几凉几热、荤素汤饭怎么搭，口味决定挑哪几道菜。</view>
     </view>
   </block>
 

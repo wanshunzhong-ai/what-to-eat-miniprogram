@@ -1,5 +1,6 @@
 const app = getApp();
-const dishesData = require('../../utils/dishes.js');
+const dishStore = require('../../utils/dishStore.js');
+const engine = require('../../utils/engine.js');
 const recommender = require('../../utils/recommender.js');
 
 const SPICY_TEXT = { 0: '不辣', 1: '微辣', 2: '中辣', 3: '重辣' };
@@ -16,9 +17,18 @@ Page({
   },
 
   onLoad(query) {
-    const id = query.id;
-    const people = Number(query.people) || 2;
-    const raw = dishesData.getById(id);
+    this.dishId = query.id;
+    this.render(Number(query.people) || 2);
+    // 本地菜品库可能是旧的，顺手在后台刷新一次；若本地没这道菜则刷新后重试
+    const that = this;
+    engine.loadDishlib(false).then(function () {
+      if (!that.data.dish) that.render(that.data.people);
+    });
+  },
+
+  /** 从菜品库取这道菜并渲染 */
+  render(people) {
+    const raw = dishStore.getById(this.dishId);
     if (!raw) {
       this.setData({ dish: null });
       return;

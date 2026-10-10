@@ -200,3 +200,44 @@
   margin-top: 8rpx;
   line-height: 1.5;
 }
+
+/* 菜品库卡片 */
+.lib-card {
+  padding: 20rpx 28rpx 24rpx;
+}
+.lib-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14rpx 0;
+  border-bottom: 1rpx solid var(--line);
+}
+.lib-label {
+  color: var(--text-sub);
+  font-size: 27rpx;
+}
+.lib-value {
+  color: var(--text);
+  font-size: 27rpx;
+  font-weight: 600;
+}
+.lib-tip {
+  margin-top: 18rpx;
+  color: var(--text-light);
+  font-size: 23rpx;
+  line-height: 1.6;
+}
+.lib-btn {
+  margin-top: 22rpx;
+  height: 76rpx;
+  line-height: 76rpx;
+  text-align: center;
+  border-radius: 38rpx;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+  font-size: 28rpx;
+  font-weight: 600;
+}
+.lib-btn-busy {
+  opacity: 0.6;
+}

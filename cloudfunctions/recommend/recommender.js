@@ -1,11 +1,27 @@
 // utils/recommender.js
-// 推荐引擎：根据「城市 / 人数 / 餐次 / 偏好」组合出一桌菜
+// 推荐引擎：按「城市 / 人数 / 口味」组合出一桌菜（人数定结构，口味定选菜）
+//
+// 菜品库不内嵌在引擎里：由调用方注入（见 setLibrary / opts.dishes）。
+//   · 云函数：从云存储取库后注入；
+//   · 小程序：dishStore 从云函数取库（或本地缓存 / 内置兜底）后注入。
+// 这样加菜、改菜都不用动引擎代码。
 
-const dishesData = require('./dishes.js');
 const citiesData = require('./cities.js');
 const foodData = require('./foodData.js');
 
-const DISHES = dishesData.DISHES;
+// 当前生效的菜品库（由 setLibrary 注入）
+let DISHES = [];
+
+/** 注入菜品库（整库替换） */
+function setLibrary(list) {
+  DISHES = Array.isArray(list) ? list : [];
+  return DISHES.length;
+}
+
+/** 当前菜品库 */
+function getLibrary() {
+  return DISHES;
+}
 
 // 「非地方特色」菜系：既给出权重，也给出选菜优先级（tier 越小越优先）。
 //   tier 1 —— 中式家常 / 街头小吃：最能和任何本地菜系搭在一起
@@ -19,6 +35,9 @@ const NON_LOCAL_CUISINE = {
   韩餐: { tier: 2, w: 0.8 },
   西餐: { tier: 2, w: 0.8 }
 };
+
+// 「清淡」偏好偏爱的分类：少油少辣、以蒸煮凉拌为主
+const LIGHT_CATEGORY = { 素: 1, 汤: 1, 凉菜: 1, 轻食: 1 };
 
 /** 计算某道菜在候选池中的基础权重：本地菜系优先，家常菜次之 */
 function baseWeight(cuisine, localCuisine) {
@@ -168,27 +187,36 @@ function buildQuotas(plan) {
 
 /**
  * 过滤出候选菜品（带权重）
+ * 推荐只按「人数 + 口味」来定：人数决定一桌的结构（见 planMenu），
+ * 口味（辣度 / 清淡）决定从各分类里挑哪几道菜。做菜时间不参与筛选，也不做限定。
  * @param {Number} [need] 一桌需要几道菜，用于决定「放宽偏好」的阈值
  */
-function buildPool(city, meal, pref, need) {
+function buildPool(dishes, city, meal, pref, need) {
   const localCuisine = city && city.cuisine ? city.cuisine : '家常菜';
   const pool = [];
-  for (let i = 0; i < DISHES.length; i++) {
-    const d = DISHES[i];
+  for (let i = 0; i < dishes.length; i++) {
+    const d = dishes[i];
     if (d.meal.indexOf(meal) < 0) continue;
+
+    // 辣度是硬约束：用户选了「不吃辣 / 微辣」，超过这个辣度的菜直接不进候选
     if (typeof pref.spicy === 'number' && pref.spicy >= 0 && d.spicy > pref.spicy) continue;
     if (pref.light && d.spicy > 1) continue;
     if (pref.exclude && pref.exclude.indexOf(d.id) >= 0) continue;
 
     let w = baseWeight(d.cuisine, localCuisine);
-    // 做菜时间是「软偏好」：不把超时的菜排除，只是优先推荐快手的、略降慢菜的权重
-    if (pref.maxTime > 0) {
-      if (d.time <= pref.maxTime) {
-        w += 1.2;
-      } else {
-        w -= Math.min(1.5, (d.time - pref.maxTime) / 30);
-      }
+
+    // 口味加权：辣度越贴近用户喜好，权重越高（差 1 级减半，差 2 级不再加分）
+    const spicy = d.spicy || 0;
+    if (typeof pref.spicy === 'number' && pref.spicy >= 0) {
+      w += Math.max(0, 2.4 - Math.abs(spicy - pref.spicy) * 1.2);
     }
+    // 口味加权：「想清淡」时优待清淡做法，重口菜降权
+    if (pref.light) {
+      if (spicy === 0) w += 0.6;
+      if (LIGHT_CATEGORY[d.category]) w += 0.8;
+      w -= spicy * 0.35;
+    }
+
     pool.push({ d: d, w: w });
   }
 
@@ -196,8 +224,8 @@ function buildPool(city, meal, pref, need) {
   const min = Math.max(6, (need || 0) + 4);
   if (pool.length < min) {
     const relaxed = [];
-    for (let i = 0; i < DISHES.length; i++) {
-      const d = DISHES[i];
+    for (let i = 0; i < dishes.length; i++) {
+      const d = dishes[i];
       if (d.meal.indexOf(meal) < 0) continue;
       relaxed.push({ d: d, w: baseWeight(d.cuisine, localCuisine) });
     }
@@ -213,11 +241,15 @@ function buildPool(city, meal, pref, need) {
  * 只有在高优先层里凑不出这道菜时，才会落到下一层。
  * 这样即便本地菜系缺某个分类（例如川菜本来没有「汤」「主食」），
  * 也会补上家常菜，而不会随机冒出「奶油蘑菇汤」「亲子丼」这类与当地味冲突的菜。
+ *
+ * 例外：用户明确点了「中辣 / 重辣」时，把够辣的菜一并提到本地层参与竞争，
+ * 好让本地口味偏清淡的城市（如上海）也能按口味真正吃到辣菜。
  */
-function selectDishes(pool, quotas, localCuisine) {
+function selectDishes(pool, quotas, localCuisine, pref) {
   const used = {};
   const result = [];
   const local = localCuisine || '家常菜';
+  const wantSpicy = pref && typeof pref.spicy === 'number' && pref.spicy >= 2;
 
   for (let i = 0; i < quotas.length; i++) {
     const cat = quotas[i];
@@ -239,7 +271,10 @@ function selectDishes(pool, quotas, localCuisine) {
     // 分层归组
     const tiers = [[], [], [], []];
     for (let j = 0; j < cand.length; j++) {
-      tiers[cuisineTier(cand[j].d.cuisine, local)].push(cand[j]);
+      let tier = cuisineTier(cand[j].d.cuisine, local);
+      // 明确要中辣/重辣时，够辣的菜无视菜系差异，直接和本地菜一起竞争
+      if (wantSpicy && (cand[j].d.spicy || 0) >= pref.spicy) tier = 0;
+      tiers[tier].push(cand[j]);
     }
     let group = tiers[3];
     for (let t = 0; t < tiers.length; t++) {
@@ -313,7 +348,8 @@ function materialize(dish, people) {
  * @param {Object} opts.city     城市对象 { name, province, cuisine }
  * @param {Number} opts.people   人数
  * @param {String} opts.meal     breakfast / lunch / dinner
- * @param {Object} opts.pref     { spicy, light, maxTime, exclude }
+ * @param {Object} opts.pref     { spicy, light, exclude }
+ * @param {Array}  [opts.dishes] 本次使用的菜品库；不传则用 setLibrary 注入的那份
  */
 function recommend(opts) {
   const city = opts.city || { name: '', province: '', cuisine: '家常菜' };
@@ -321,12 +357,36 @@ function recommend(opts) {
   const people = Math.max(1, Math.min(15, Math.round(opts.people || 1)));
   const meal = opts.meal || mealByTime();
   const pref = opts.pref || {};
+  const dishes0 = (opts.dishes && opts.dishes.length) ? opts.dishes : DISHES;
 
-  // 先按风俗拆解一桌的结构，再按结构选菜
+  // 先按风俗拆解一桌的结构（结构只跟人数 / 餐次有关）
   const menu = planMenu(people, meal);
+
+  // 菜品库不可用：不编造结果，明确告诉调用方，由其决定是否降级
+  if (!dishes0.length) {
+    return {
+      id: 'rec_' + Date.now(),
+      city: city,
+      people: people,
+      meal: meal,
+      mealLabel: MEAL_LABEL[meal] || '一餐',
+      count: 0,
+      dishes: [],
+      cuisines: [],
+      menu: menu,
+      menuText: describeMenu(menu, meal),
+      menuTip: menuTip(people, meal),
+      catCount: {},
+      totalTime: 0,
+      localFoods: foodData.getLocalFoods(city),
+      createdAt: Date.now(),
+      error: 'NO_DISHLIB'
+    };
+  }
+
   const quotas = buildQuotas(menu);
-  const pool = buildPool(city, meal, pref, quotas.length);
-  const picked = selectDishes(pool, quotas, city.cuisine);
+  const pool = buildPool(dishes0, city, meal, pref, quotas.length);
+  const picked = selectDishes(pool, quotas, city.cuisine, pref);
 
   const dishes = picked.map(function (d) {
     return materialize(d, people);
@@ -379,5 +439,7 @@ module.exports = {
   menuTip: menuTip,
   materialize: materialize,
   formatAmount: formatAmount,
+  setLibrary: setLibrary,
+  getLibrary: getLibrary,
   MEAL_LABEL: MEAL_LABEL
 };

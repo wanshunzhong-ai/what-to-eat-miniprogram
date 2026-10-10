@@ -5,6 +5,18 @@
       {
         "value": "README.md",
         "type": "file"
+      },
+      {
+        "value": "data",
+        "type": "folder"
+      },
+      {
+        "value": "scripts",
+        "type": "folder"
+      },
+      {
+        "value": ".workbuddy",
+        "type": "folder"
       }
     ],
     "include": []

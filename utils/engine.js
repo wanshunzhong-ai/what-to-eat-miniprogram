@@ -2,10 +2,22 @@
 // 数据获取统一入口。
 //
 // recommend：推荐一桌菜 —— 优先云函数 recommend，失败回退本地同一套逻辑。
+// loadDishlib：拉取菜品库到本地（云端 → 缓存 → 内置兜底），并注入推荐引擎。
 // nearbyPlaces：附近的店 —— 必须联网（走云函数 nearby 代理腾讯位置服务），失败时返回结构化错误而不抛异常。
 
 const localRecommender = require('./recommender.js');
+const dishStore = require('./dishStore.js');
 const config = require('../config.js');
+
+/** 确保菜品库已就绪（同步，立即可用） */
+function ensureDishlib() {
+  return dishStore.ensure();
+}
+
+/** 从云端刷新菜品库（异步，失败不清空已有数据） */
+function loadDishlib(force) {
+  return dishStore.load(force);
+}
 
 /**
  * 生成一份推荐结果
@@ -47,10 +59,12 @@ function recommend(opts) {
   });
 }
 
-/** 本地兜底 */
+/** 本地兜底：用本地菜品库（缓存或内置兜底）跑同一套推荐逻辑 */
 function fallback(opts) {
-  const r = localRecommender.recommend(opts);
+  const lib = dishStore.ensure();
+  const r = localRecommender.recommend(Object.assign({}, opts, { dishes: lib }));
   r.source = 'local';
+  r.dishLibSource = dishStore.meta().source;
   return r;
 }
 
@@ -120,5 +134,7 @@ function nearbyPlaces(opts) {
 
 module.exports = {
   recommend: recommend,
+  ensureDishlib: ensureDishlib,
+  loadDishlib: loadDishlib,
   nearbyPlaces: nearbyPlaces
 };

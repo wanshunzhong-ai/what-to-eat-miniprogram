@@ -14,10 +14,15 @@
 - **按城市推荐**：识别城市后，优先推荐当地菜系（成都→川菜、广州→粤菜、西安→西北菜…）
 - **按人数配菜（照风俗习惯来，人数 15 人内）**：选完人数后当场给出**冷热菜配比建议**（凉菜 / 荤 / 素 / 汤 / 主食各几道），食材用量同步按人数换算（如「嫩豆腐 450 g」）。人数 1~15 都可选，快捷选项 1~15 人，也可用「＋ / −」步进器微调
 - **智能搭配**：一桌菜自动保证荤 / 素 / 汤 / 主食的搭配，不重复、不翻车；本地菜系优先，缺项才用家常菜兜底
-- **口味偏好**：辣度（不吃辣 / 微辣 / 中辣 / 重辣）、是否清淡、希望的做菜时间
-- **做菜时间是软偏好**：只是优先推荐快手菜，**不会把慢菜一刀切掉**；凑不齐时才逐步放宽
+- **口味偏好（推荐的两大依据之一）**：辣度（随便 / 不吃辣 / 微辣 / 中辣 / 重辣）、是否清淡。
+  - 推荐只按 **人数 + 口味** 来配：**人数**决定一桌的结构（几凉几热、荤素汤饭怎么搭），**口味**决定从各分类里挑哪几道菜
+  - 辣度是硬约束（选「不吃辣」就不会出现辣菜）+ 软加权（越贴近所选辣度越优先）；点「中辣 / 重辣」时，本地口味偏清淡的城市也会按口味翻出辣菜来
+  - 「想清淡」会优待清淡做法（少辣、素 / 汤 / 凉菜 / 轻食），重口菜降权
+- **做菜时间不设限**：菜品不分快手 / 慢炖，全凭菜系与口味挑，结果页只作「其中最费时的一道约 X 分钟」的参考展示
 - **换一批**：不满意就一键换一批
 - **菜品详情**：食材清单（按人数换算）、做法步骤、小贴士，可收藏
+- **菜品库调用式，不内嵌**：菜品库放在云端，运行时由 `dishes` 云函数下发（云端 → 本地缓存 → 内置兜底三级降级）。
+  **加菜 / 改菜不用改代码、不用重新发版**，改完云端数据下次进入即生效；「我的」页可查看菜品库来源 / 版本 / 数量并手动更新。
 
 ### 配比规则（中式用饭惯例，非硬性规定）
 
@@ -69,6 +74,9 @@
       │
       ▼
 utils/engine.js ──► 云函数 recommend（云端跑推荐逻辑）
+      │                    │ 取菜品库
+      │                    ▼
+      │              云存储 dishlib/dishlib.json（加菜/改菜不用发版）
       │                    │ 成功
       │                    ▼
       │              返回一桌菜结果
@@ -78,7 +86,24 @@ utils/engine.js ──► 云函数 recommend（云端跑推荐逻辑）
 
 - 小程序启动时在 `app.js` 里 `wx.cloud.init({ env, traceUser: true })` 初始化一次。
 - 推荐统一走 `utils/engine.js`：**云端优先，本地兜底**，任何一步失败都不会影响使用。
-- 云端与本地复用**同一套** `recommender / cities / dishes / foodData`，结果一致。
+- 云端与本地复用**同一套** `recommender / cities / foodData`，结果一致；**菜品库是运行时注入的**，不在代码里内嵌。
+
+### 菜品库：调用式，不内嵌
+
+菜品库**不打包进小程序**，而是运行时「调用」云端数据：
+
+```
+小程序 utils/dishStore.js ──► 云函数 dishes ──► 云存储 dishlib/dishlib.json
+        │  三级来源，逐级降级
+        └─ cloud（云端最新） → cache（本地缓存，离线可用） → builtin（内置兜底 47 道，首次无网可用）
+```
+
+- **加菜 / 改菜不用改代码、不用重新发版**：更新云端数据即可，用户下次进入自动生效。
+- 客户端带 `version` 比对，版本没变就不重传整库，省流量。
+- 云函数 `dishes` 的 `action`：`list`（取库，默认）/ `get`（取单菜）/ `meta`（版本与分布）/ `publish`（热更新写回云存储）/ `seed`（把出厂数据集写回云存储）。
+- 完整库的唯一数据源是仓库里的 `data/dishlib.json`（**已被 `packOptions.ignore` 排除，不进小程序包**），
+  用 `node scripts/sync-dishlib.js` 校验并同步到 `cloudfunctions/dishes/dishlib.json`。
+- 「我的」页可查看当前菜品库的来源 / 版本 / 数量，并可手动「更新菜品库」。
 
 ### 运行环境兼容（`utils/wxapi.js`）
 
@@ -130,6 +155,7 @@ module.exports = {
   ENABLE_CLOUD: true,                                   // 关掉则完全走本地逻辑
   ENV_ID: 'zws-04161130-l-d6gd7g8f0c8c7fb17',           // 云开发环境 ID
   RECOMMEND_FN: 'recommend',                            // 推荐云函数名
+  DISHES_FN: 'dishes',                                  // 菜品库云函数名（运行时下发菜品库）
   NEARBY_FN: 'nearby',                                  // 附近店铺云函数名
   NEARBY_RADIUS: 3000                                   // 周边搜索半径（米）
 };
@@ -137,15 +163,26 @@ module.exports = {
 
 ### 部署云函数
 
-`recommend` 云函数**已部署到环境 `zws-04161130-l`**，调用验证通过（返回 `source: "cloud"`）。
+三个云函数**均已部署到环境 `zws-04161130-l`**，调用验证通过：
 
-若你更换了环境，或修改了 `cloudfunctions/recommend/` 下的数据/逻辑需要重新上传：
+| 云函数 | 作用 | 备注 |
+|---|---|---|
+| `dishes` | 菜品库下发 + 热更新 | 已播种云存储 `dishlib/dishlib.json`（341 道，v2026.10.10.1） |
+| `recommend` | 推荐一桌菜 | 运行时从云存储取菜品库（返回 `source: "cloud"`） |
+| `nearby` | 附近美食店 | 需在环境变量配 `TENCENT_LBS_KEY` |
+
+`dishes` / `recommend` 都建议配置环境变量 `DISHLIB_FILE_ID`（菜品库在云存储里的 fileID），
+`recommend` 会优先直连云存储取库，少一跳、更快。
+
+若你更换了环境，或修改了 `cloudfunctions/` 下的数据/逻辑需要重新上传：
 
 1. 微信开发者工具顶部点「**云开发**」，用**微信公众平台登录**，确认能看到环境 `zws-04161130-l`（看不到见下方排查）。
-2. 在左侧文件树找到 `cloudfunctions/recommend` → **右键 → 「上传并部署：云端安装依赖」**。
-3. 等编译完成，回到首页点「帮我决定」。若控制台打印 `[云开发] 初始化完成` 且结果正常，说明云端已生效。
+2. 在左侧文件树找到 `cloudfunctions/dishes` 与 `cloudfunctions/recommend` → 分别 **右键 → 「上传并部署：云端安装依赖」**。
+3. 首次部署 `dishes` 后，调一次 `{"action":"seed"}` 把菜品库写入云存储（之后改菜走 `publish` 即可）。
+4. 等编译完成，回到首页点「帮我决定」。若控制台打印 `[云开发] 初始化完成` 且结果正常，说明云端已生效。
 
 > 想验证走的是云端还是本地：结果对象里有 `source` 字段，`cloud` 表示云端、`local` 表示本地兜底。
+> 推荐结果里还会带 `dishLibVersion` / `dishLibCount`，用来确认菜品库确实是运行时取到的。
 > 「点外卖」那条路必有 `source: 'cloud'`——附近的店没有本地等价实现，必须联网。
 
 ### 看不到环境 / 云开发入口置灰？
@@ -215,26 +252,36 @@ pages/takeout ──► utils/engine.js ──► 云函数 nearby ──► 腾
 
 ```
 VX-2/
-├── app.js / app.json / app.wxss     全局逻辑（含云开发初始化）、路由、主题样式
+├── app.js / app.json / app.wxss     全局逻辑（含云开发初始化 + 菜品库预热）、路由、主题样式
 ├── config.js                        云开发配置（环境 ID / 开关 / 云函数名 / 搜索半径）
-├── project.config.json              项目配置（AppID、cloudfunctionRoot）
+├── project.config.json              项目配置（AppID、cloudfunctionRoot、packOptions.ignore）
+├── data/
+│   └── dishlib.json                 菜品库唯一数据源（341 道，已被 packOptions.ignore 排除，不进小程序包）
+├── scripts/
+│   ├── sync-dishlib.js              校验 data/dishlib.json 并同步到 dishes 云函数
+│   └── gen-fallback.js              从完整库生成 utils/dishes.js 的精简内置兜底
 ├── pages/
 │   ├── index/     首页：自己做 / 点外卖 模式切换 + 定位 + 人数 + 餐次 + 偏好/预算
 │   ├── city/      城市选择：搜索 + 热门城市 + 自动定位 + 「离你最近」
 │   ├── result/    推荐结果：一桌菜 + 换一批 + 本地人气
 │   ├── takeout/   外卖结果：附近的店 + 品类/预算筛选 + 导航/电话 + 收藏
-│   ├── detail/    菜品详情：食材用量换算 + 做法 + 收藏
-│   └── mine/      我的：偏好设置 + 收藏（菜品/店铺）+ 历史
+│   ├── detail/    菜品详情：从菜品库取数 + 食材用量换算 + 做法 + 收藏
+│   └── mine/      我的：偏好设置 + 菜品库状态/更新 + 收藏（菜品/店铺）+ 历史
 ├── utils/
 │   ├── cities.js        城市坐标 + 省份 + 对应菜系（131 座，含直辖市多锚点、就近匹配）
-│   ├── dishes.js        菜品库（341 道，含食材/做法/辣度/餐次）
+│   ├── dishes.js        内置兜底菜品库（47 道，覆盖全部分类；完整库在云端）
+│   ├── dishStore.js     菜品库运行时数据源：cloud → cache → builtin 三级降级
 │   ├── foodData.js      各地人气美食
-│   ├── recommender.js   推荐算法引擎（本地兜底）
+│   ├── recommender.js   推荐算法引擎（菜品库由外部注入，不内嵌数据）
 │   ├── takeout.js       外卖品类/预算规则 + 店铺归一化与排序
 │   ├── wxapi.js         wx 接口安全层（缺失接口兜底 + 定位 Promise 封装）
-│   └── engine.js        数据统一入口：recommend（云端优先/本地兜底）+ nearbyPlaces
+│   └── engine.js        数据统一入口：recommend（云端优先/本地兜底）+ loadDishlib + nearbyPlaces
 └── cloudfunctions/
-    ├── recommend/       推荐云函数（含同一套 recommender/cities/dishes/foodData）
+    ├── dishes/          菜品库云函数（读云存储下发 + publish/seed 热更新）
+    │   ├── index.js
+    │   ├── dishlib.json  出厂数据集 / 播种源（由 scripts/sync-dishlib.js 生成）
+    │   └── package.json
+    ├── recommend/       推荐云函数（含同一套 recommender/cities/foodData，运行时取菜品库）
     │   ├── index.js
     │   └── package.json
     └── nearby/          附近店铺云函数（代理腾讯位置服务，Key 走环境变量）
@@ -245,19 +292,22 @@ VX-2/
 ## 📊 数据规模
 
 - **341 道菜**，覆盖川菜、粤菜、湘菜、鲁菜、苏菜、浙菜、闽菜、徽菜、东北菜、西北菜、云贵菜、京菜、本帮菜、鄂菜、豫菜、家常菜，以及日料、韩餐、西餐、轻食、小吃；每个菜系 ≥ 8 道，冷盘 / 素菜 / 汤羹 / 小吃 / 轻食都已成体系，15 人大桌也能配出地道本地味
+- 其中 **47 道**作为内置兜底打进小程序包，**341 道**由云端在运行时下发
 - **131 座城市**，每个城市映射到对应菜系
 - **13 个外卖品类**，每个品类带搜索关键词与参考人均区间
 - 每道菜包含：菜名、图标、菜系、荤素分类、辣度、适用餐次、烹饪时间、难度、食材（含每人份量）、调料、做法步骤、小贴士
 
 ## 🛠️ 如何扩充
 
-- **加菜**：在 `utils/dishes.js` 里按现有格式追加一条即可（id 不要重复）
+- **加菜 / 改菜（推荐，不用发版）**：改 `data/dishlib.json` → 跑 `node scripts/sync-dishlib.js` → 重新部署 `dishes` 云函数；
+  或者直接调 `dishes` 云函数的 `publish` 动作把新库写进云存储，用户下次进入即生效
+- **调整内置兜底**：改完 `data/dishlib.json` 后跑 `node scripts/gen-fallback.js` 重新生成 `utils/dishes.js`
 - **加城市**：在 `utils/cities.js` 的 `CITIES` 里加一行（名称、省份、经纬度、菜系）
 - **加本地美食**：在 `utils/foodData.js` 里补充
 - **加外卖品类**：在 `utils/takeout.js` 的 `CATEGORIES` 里加一项，并在 `CAT_RULES` 里补上识别关键词
 
-改完数据后，把 `utils/` 下对应的 `cities.js / dishes.js / foodData.js / recommender.js`
-同步复制到 `cloudfunctions/recommend/`，再在开发者工具里重新上传该云函数。
+改完 `cities.js / foodData.js / recommender.js` 后，把对应文件同步复制到 `cloudfunctions/recommend/`，
+再在开发者工具里重新上传该云函数（`dishes` 云函数的菜品数据不需要复制到 `recommend`）。
 
 ## 🔭 下一步可以做什么
 

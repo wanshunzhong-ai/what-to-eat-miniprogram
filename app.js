@@ -1,5 +1,6 @@
 const config = require('./config.js');
 const wxapi = require('./utils/wxapi.js');
+const dishStore = require('./utils/dishStore.js');
 
 const STORAGE = {
   CITY: 'eat_city',
@@ -21,12 +22,14 @@ App({
     lastLocation: null,
     // 上一次「点外卖」的查询条件 { people, meal, budget, cat }，供外卖页读取与历史重跑
     takeoutQuery: null,
-    // 偏好 { spicy: -1不限 | 0不辣 | 1微辣 | 2中辣 | 3重辣, light: 是否清淡, maxTime: 最长烹饪时间(分钟), exclude: [] }
-    pref: { spicy: -1, light: false, maxTime: 0, exclude: [] },
+    // 偏好 { spicy: -1不限 | 0不辣 | 1微辣 | 2中辣 | 3重辣, light: 是否清淡, exclude: [] }
+    pref: { spicy: -1, light: false, exclude: [] },
     history: [],
     favorites: [],
     // 收藏的店（点外卖分支）
-    shopFavorites: []
+    shopFavorites: [],
+    // 菜品库同步信息 { source: cloud|cache|builtin, version, count, lastSyncAt, lastError }
+    dishLib: null
   },
 
   onLaunch() {
@@ -38,6 +41,30 @@ App({
     }
     this.initCloud();
     this.restore();
+    this.initDishlib();
+  },
+
+  /**
+   * 菜品库初始化：先用「缓存 / 内置兜底」保证启动即有菜可推，再后台从云端刷新。
+   * 菜品库不内嵌在小程序包里 —— 加菜 / 改菜只需更新云端数据，无需重新发版。
+   */
+  initDishlib() {
+    const that = this;
+    dishStore.ensure();
+    this.globalData.dishLib = dishStore.meta();
+    dishStore.load(false, this).then(function (meta) {
+      that.globalData.dishLib = meta;
+      console.info('[菜品库] 来源=' + meta.source + ' 版本=' + meta.version + ' 共' + meta.count + '道');
+    });
+  },
+
+  /** 手动刷新菜品库（「我的」页按钮用） */
+  refreshDishlib(force) {
+    const that = this;
+    return dishStore.load(force !== false, this).then(function (meta) {
+      that.globalData.dishLib = meta;
+      return meta;
+    });
   },
 
   /** 初始化云开发（失败不阻断，自动降级到本地推荐逻辑） */

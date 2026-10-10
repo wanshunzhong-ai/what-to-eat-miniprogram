@@ -12,6 +12,10 @@ module.exports = {
   // 推荐云函数名（与 cloudfunctions/recommend 目录名一致）
   RECOMMEND_FN: 'recommend',
 
+  // 菜品库云函数名（与 cloudfunctions/dishes 目录名一致）
+  // 菜品库不内嵌在小程序里：由它从云存储读取后下发，加菜改菜无需发版。
+  DISHES_FN: 'dishes',
+
   // 附近美食店云函数名（与 cloudfunctions/nearby 目录名一致）
   // 它代理腾讯位置服务的周边搜索；地图 Key 存在云函数环境变量 TENCENT_LBS_KEY 里，不下发到前端。
   NEARBY_FN: 'nearby',

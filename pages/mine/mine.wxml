@@ -23,17 +23,30 @@
       <view class="pref-label">想清淡</view>
       <switch class="pref-switch" checked="{{pref.light}}" color="#FF6B35" bindchange="onToggleLight" />
     </view>
-    <view class="pref-row">
-      <view class="pref-label">做菜时间</view>
-      <view class="chip-row wrap flex-1">
-        <view
-          wx:for="{{timeOptions}}"
-          wx:key="value"
-          class="pick-chip sm {{pref.maxTime === item.value ? 'pick-on' : ''}}"
-          data-value="{{item.value}}"
-          bindtap="onPickTime"
-        >{{item.label}}</view>
-      </view>
+  </view>
+
+  <!-- 菜品库（不内嵌在代码里，运行时从云端调用） -->
+  <view class="section-title">菜品库</view>
+  <view class="card lib-card">
+    <view class="lib-row">
+      <text class="lib-label">当前来源</text>
+      <text class="lib-value">{{dishLibSourceText}}</text>
+    </view>
+    <view class="lib-row">
+      <text class="lib-label">菜品数量</text>
+      <text class="lib-value">{{dishLib.count}} 道</text>
+    </view>
+    <view class="lib-row">
+      <text class="lib-label">数据版本</text>
+      <text class="lib-value">{{dishLib.version || '—'}}</text>
+    </view>
+    <view class="lib-row">
+      <text class="lib-label">最近同步</text>
+      <text class="lib-value">{{dishLibTimeText}}</text>
+    </view>
+    <view class="lib-tip">菜品库放在云端，加菜 / 改菜无需重新发版；连不上云端时自动用本地缓存或内置兜底。</view>
+    <view class="lib-btn {{dishLibSyncing ? 'lib-btn-busy' : ''}}" bindtap="onRefreshDishlib">
+      {{dishLibSyncing ? '同步中…' : '更新菜品库'}}
     </view>
   </view>
 

@@ -1,5 +1,6 @@
 const app = getApp();
 const engine = require('../../utils/engine.js');
+const dishStore = require('../../utils/dishStore.js');
 const wxapi = require('../../utils/wxapi.js');
 
 const SPICY_OPTIONS = [
@@ -10,11 +11,12 @@ const SPICY_OPTIONS = [
   { value: 3, label: '重辣' }
 ];
 
-const TIME_OPTIONS = [
-  { value: 0, label: '不限' },
-  { value: 30, label: '30分钟内' },
-  { value: 60, label: '1小时内' }
-];
+// 菜品库来源 → 展示文案
+const SOURCE_TEXT = {
+  cloud: '云端菜品库',
+  cache: '本地缓存',
+  builtin: '内置兜底'
+};
 
 function pad(n) {
   return n < 10 ? '0' + n : '' + n;
@@ -66,9 +68,13 @@ Page({
     favList: [],
     shopList: [],
     historyList: [],
-    pref: { spicy: -1, light: false, maxTime: 0 },
+    pref: { spicy: -1, light: false },
     spicyOptions: SPICY_OPTIONS,
-    timeOptions: TIME_OPTIONS
+    // 菜品库同步信息
+    dishLib: null,
+    dishLibSourceText: '',
+    dishLibTimeText: '',
+    dishLibSyncing: false
   },
 
   onShow() {
@@ -76,11 +82,32 @@ Page({
   },
 
   refresh() {
+    const meta = app.globalData.dishLib || dishStore.meta();
     this.setData({
       favList: app.globalData.favorites.slice(),
       shopList: app.globalData.shopFavorites.slice(),
       historyList: app.globalData.history.map(formatHistory),
-      pref: Object.assign({ spicy: -1, light: false, maxTime: 0 }, app.globalData.pref)
+      pref: Object.assign({ spicy: -1, light: false }, app.globalData.pref),
+      dishLib: meta,
+      dishLibSourceText: SOURCE_TEXT[meta.source] || '未知',
+      dishLibTimeText: meta.lastSyncAt ? timeText(meta.lastSyncAt) : '尚未同步'
+    });
+  },
+
+  /** 手动更新菜品库：不依赖小程序发版，改完云端数据即可生效 */
+  onRefreshDishlib() {
+    if (this.data.dishLibSyncing) return;
+    const that = this;
+    this.setData({ dishLibSyncing: true });
+    wx.showLoading({ title: '同步菜品库…', mask: true });
+    app.refreshDishlib(true).then(function (meta) {
+      wx.hideLoading();
+      that.setData({ dishLibSyncing: false });
+      that.refresh();
+      const tip = meta.source === 'cloud'
+        ? ('已更新：' + meta.count + ' 道菜')
+        : ('未能连上云端，继续使用' + (SOURCE_TEXT[meta.source] || '本地数据'));
+      wx.showToast({ title: tip, icon: 'none' });
     });
   },
 
@@ -100,12 +127,6 @@ Page({
     const value = e.detail.value;
     app.setPref({ light: value });
     this.setData({ 'pref.light': value });
-  },
-
-  onPickTime(e) {
-    const value = Number(e.currentTarget.dataset.value);
-    app.setPref({ maxTime: value });
-    this.setData({ 'pref.maxTime': value });
   },
 
   // ---------------------------------------------------------------- 菜品收藏
