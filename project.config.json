@@ -7,6 +7,10 @@
         "type": "file"
       },
       {
+        "value": "CODE_REVIEW.md",
+        "type": "file"
+      },
+      {
         "value": "data",
         "type": "folder"
       },

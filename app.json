@@ -21,8 +21,7 @@
     }
   },
   "requiredPrivateInfos": [
-    "getLocation",
-    "getFuzzyLocation"
+    "getLocation"
   ],
   "style": "v2",
   "lazyCodeLoading": "requiredComponents",
