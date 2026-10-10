@@ -216,9 +216,15 @@ App({
     return userStore.meta();
   },
 
-  /** 保存当前城市 */
-  setCity(city) {
+  /**
+   * 保存当前城市
+   * @param {Object} city 城市对象
+   * @param {boolean} [persist=true] 是否落本地存储。
+   *   低置信度的定位结果应传 false——只作用于本次会话，避免把大概率不对的城市记住。
+   */
+  setCity(city, persist) {
     this.globalData.city = city;
+    if (persist === false) return;
     try {
       wx.setStorageSync(STORAGE.CITY, city);
     } catch (e) {

@@ -7,7 +7,9 @@ const config = require('../../config.js');
 
 const RADIUS = config.NEARBY_RADIUS || 3000;
 const PAGE_SIZE = 20;
-const LOCATION_TTL = 10 * 60 * 1000;
+// 位置快照的复用时长。原来是 10 分钟——边走边找店时距离全是按旧位置算的，
+// 与「定位要精确」直接冲突，因此收到 90 秒；下拉刷新 / 重试一律强制重新定位。
+const LOCATION_TTL = 90 * 1000;
 
 Page({
   data: {
@@ -33,6 +35,8 @@ Page({
     page: 1,
     hasMore: false,
     radiusText: '',
+    // 定位精度说明（距离都是按这个位置算的，精度差要让人看得见）
+    locText: '',
     fallbackFoods: [],
     catLabel: '全部'
   },
@@ -55,7 +59,8 @@ Page({
   },
 
   onPullDownRefresh() {
-    this.fetch(true).then(function () {
+    // 下拉刷新是「我可能换地方了」的明确信号 → 强制重新定位
+    this.fetch(true, true).then(function () {
       wxapi.call('stopPullDownRefresh', {});
       wxapi.call('pageScrollTo', { scrollTop: 0, duration: 200 });
     });
@@ -63,14 +68,19 @@ Page({
 
   // ------------------------------------------------------------ 定位
 
-  /** 取当前坐标：优先用首页刚定位的结果，过期再重新定位 */
-  resolveLocation() {
+  /** 取当前坐标：优先用刚才定位的结果，过期或强制刷新时重新定位 */
+  resolveLocation(forceFresh) {
     const cached = app.globalData.lastLocation;
-    if (cached && cached.latitude && cached.longitude &&
+    if (!forceFresh && cached && cached.latitude && cached.longitude &&
         (Date.now() - (cached.at || 0)) < LOCATION_TTL) {
-      return Promise.resolve({ latitude: cached.latitude, longitude: cached.longitude });
+      return Promise.resolve({
+        latitude: cached.latitude,
+        longitude: cached.longitude,
+        accuracy: cached.accuracy,
+        cached: true
+      });
     }
-    return wxapi.getLocation({ fresh: true }).then(function (res) {
+    return wxapi.getLocation({ fresh: true, attempts: 3 }).then(function (res) {
       if (res && res.ok) {
         app.globalData.lastLocation = {
           latitude: res.latitude,
@@ -78,7 +88,12 @@ Page({
           accuracy: res.accuracy,
           at: Date.now()
         };
-        return { latitude: res.latitude, longitude: res.longitude };
+        return {
+          latitude: res.latitude,
+          longitude: res.longitude,
+          accuracy: res.accuracy,
+          cached: false
+        };
       }
       return null;
     });
@@ -98,8 +113,11 @@ Page({
   /**
    * 拉取附近的店
    * @param {boolean} reset true=从第一页重新取（换品类/下拉刷新），false=取下一页
+   * @param {boolean} forceLocate true=忽略位置快照，强制重新定位。
+   *   只在用户明确要求刷新（下拉刷新 / 重试）时给 true；换品类、翻页沿用快照，
+   *   否则每次点 chip 都发一次 getLocation，会撞上 2.17.0 起的调用频率限制。
    */
-  fetch(reset) {
+  fetch(reset, forceLocate) {
     if (this._loading) return Promise.resolve();
     this._loading = true;
 
@@ -107,8 +125,9 @@ Page({
     const page = reset ? 1 : this.data.page + 1;
     this.setData({ loading: true, state: reset ? 'loading' : this.data.state });
 
-    return this.resolveLocation().then(function (loc) {
+    return this.resolveLocation(!!forceLocate).then(function (loc) {
       if (!loc) {
+        that._loc = null;
         that._loading = false;
         that.setData({
           loading: false,
@@ -118,10 +137,12 @@ Page({
           message: '没有定位就拿不到附近的店',
           noticeHint: '请在微信的「设置 → 隐私 → 位置信息」里允许本小程序使用位置，然后重试。',
           noticeCode: 'LOCATION_DENIED',
+          locText: '',
           fallbackFoods: []
         });
         return;
       }
+      that._loc = loc;
       return engine.nearbyPlaces({
         lat: loc.latitude,
         lng: loc.longitude,
@@ -179,6 +200,17 @@ Page({
     };
   },
 
+  /** 把定位精度说清楚：门店距离都是按这个位置算的，精度差必须让人看得见 */
+  locationText(loc) {
+    const l = loc || this._loc;
+    if (!l || typeof l.accuracy !== 'number' || l.accuracy <= 0) return '';
+    const acc = l.accuracy;
+    const t = acc <= 1000
+      ? ('±' + Math.round(acc) + ' 米')
+      : ('±' + (Math.round(acc / 100) / 10) + ' 公里');
+    return '定位精度 ' + t + (l.cached ? '（90 秒内的位置）' : '');
+  },
+
   applyResult(res, page) {
     if (!res || !res.ok) {
       const kind = this.failureKind(res);
@@ -192,6 +224,7 @@ Page({
         message: (res && res.message) || '获取附近的店失败',
         noticeHint: (res && res.hint) || kind.hint,
         noticeCode: debug,
+        locText: this.locationText(),
         list: page === 1 ? [] : this.data.list,
         hasMore: false,
         // 任何失败都给「人气美食」兜底，不让页面变成死路
@@ -213,6 +246,7 @@ Page({
       hasMore: raw.length >= PAGE_SIZE && res.exhausted !== true,
       dataSourceText: res.dataSource === 'osm' ? '数据来自 OpenStreetMap' : (res.dataSource === 'tencent' ? '数据来自腾讯地图' : ''),
       note: res.note || '',
+      locText: this.locationText(),
       // 线上没找到时，也拿人气美食垫一下
       fallbackFoods: list.length ? [] : this.buildFallback(),
       radiusText: res.radius
@@ -292,7 +326,8 @@ Page({
 
   onRetry() {
     this._raw = [];
-    this.fetch(true);
+    // 手动重试往往正是因为位置不对，强制重新定位
+    this.fetch(true, true);
   },
 
   onFav(e) {

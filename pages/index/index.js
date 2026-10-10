@@ -21,9 +21,15 @@ function formatAccuracy(acc) {
   return '精度约 ±' + Math.round(acc / 1000) + ' 公里（较粗略）';
 }
 
+/** 精度超过这个值就算「粗略」，要提醒用户可重新定位 */
+const COARSE_ACCURACY = 500;
+
 /** 拼一句「定位结果说明」，把识别依据透明地告诉用户 */
 function buildStatus(c, res) {
   const acc = formatAccuracy(res && res.accuracy);
+  const coarse = !!(res && typeof res.accuracy === 'number' && res.accuracy > COARSE_ACCURACY);
+  const tail = coarse ? '，可点下方「🎯 重新定位」再试一次' : '';
+
   if (c.lowConfidence) {
     return '附近没有收录的城市，已按最近的「' + c.name + '」推荐（相距约 ' + c.distanceKm + ' 公里），点上方可切换';
   }
@@ -33,7 +39,7 @@ function buildStatus(c, res) {
   } else {
     s = '已定位到「' + c.name + '」';
   }
-  return acc ? (s + ' · ' + acc) : s;
+  return (acc ? (s + ' · ' + acc) : s) + tail;
 }
 
 Page({
@@ -184,7 +190,9 @@ Page({
           that.setData({ cityStatus: '没能识别出城市，请手动选择' });
           return;
         }
-        app.setCity(c);
+        // 低置信度（附近没有收录的城市，只是取了个「最近的」）不落盘：
+        // 否则下次冷启动会直接沿用这个大概率不对的城市，用户再也等不到自动纠正。
+        app.setCity(c, !c.lowConfidence);
         that.setData({ city: c, cityStatus: buildStatus(c, res) });
         that.refreshHint();
         // 落在两城交界、且两地菜系不同时，让用户点一下就确认
